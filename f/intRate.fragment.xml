@@ -3,50 +3,44 @@
 		<content>
 			<l:Grid defaultSpan="L12 M12 S12" vSpacing="0.5" hSpacing="0.5">
 				<l:content>
-	<VBox>
+					<VBox>
 						<Text text="Month"/>
 						<Input id="idMnInp" type="Number"/>
 						<layoutData>
 							<l:GridData span="L6 M6 S6"/>
 						</layoutData>
 					</VBox>
-						<VBox>
+					<VBox>
 						<Text text="Interest (%)"/>
 						<Input id="idRoiInp" type="Number"/>
 						<layoutData>
 							<l:GridData span="L6 M6 S6"/>
 						</layoutData>
 					</VBox>
-					
-						
-						<HBox justifyContent="End">
-							<Button type="Accept" icon="sap-icon://add-activity-2" text="Add" press="onAddROI"/>
-						</HBox>
-						
-					<t:Table  rows="{iDialogModel>/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
-						rowActionCount="1"  enableCellFilter="true">
+					<HBox justifyContent="End">
+						<Button type="Ghost" icon="sap-icon://add-activity-2" text="Add" press="onAddROI"/>
+					</HBox>
+					<t:Table rows="{iDialogModel>/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
+						rowActionCount="1" enableCellFilter="true">
 						<t:columns>
-						
-							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false" >
+							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
 								<Text text="Month" class="white bold" textAlign="Begin" wrapping="false"/>
 								<t:template>
 									<Text text="{iDialogModel>month}" press=".onNav(${oModel>})"/>
 								</t:template>
 							</t:Column>
-						
-							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false" >
-								<Text text="Interest" class="white bold" textAlign="Begin" wrapping="false" />
+							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
+								<Text text="Interest" class="white bold" textAlign="Begin" wrapping="false"/>
 								<t:template>
 									<Text text="{iDialogModel>roi}%"/>
 								</t:template>
 							</t:Column>
-							
-						
 						</t:columns>
-						<t:rowActionTemplate> 
-							<t:RowAction> 
-							 	<t:RowActionItem icon="sap-icon://delete" text="{i18n>delete}" press="onDelIntMonth" visible="{=(${iDialogModel>month}!==1&amp;&amp;${iDialogModel>month}!=='1')}"/>
-						 	</t:RowAction>
+						<t:rowActionTemplate>
+							<t:RowAction>
+								<t:RowActionItem icon="sap-icon://delete" text="{i18n>delete}" press="onDelIntMonth"
+									visible="{=(${iDialogModel>month}!==1&amp;&amp;${iDialogModel>month}!=='1')}"/>
+							</t:RowAction>
 						</t:rowActionTemplate>
 					</t:Table>
 				</l:content>
@@ -54,7 +48,7 @@
 		</content>
 		<buttons>
 			<Button type="Ghost" text="Close" press="onClose" class="sapUiTinyMarginEnd"/>
-			<Button type="Accept" text="Update" press="cUpdateInt" class="sapUiTinyMarginEnd"/>
+			<Button type="Ghost" text="Update" press="cUpdateInt" class="sapUiTinyMarginEnd"/>
 		</buttons>
 		<beginButton></beginButton>
 		<endButton></endButton>
