@@ -4,17 +4,15 @@
 		<pages>
 			<Page title="" class="sapUiSizeCompact" showNavButton="true" navButtonPress="onNavBack">
 				<customHeader>
-					<Bar>
-						<contentLeft>
-							<VBox>
-								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
-							</VBox>
-							<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginBegin"/>
-						</contentLeft>
-						<contentMiddle>
-							<DatePicker id="idDt" class="classDt" width="10rem" change="showAssetData" valueFormat="MMM dd,yyyy"/>
-						</contentMiddle>
-					</Bar>
+					<Toolbar>
+						<VBox>
+							<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
+						</VBox>
+						<ToolbarSpacer/>
+						<DatePicker id="idDt" class="classDt" width="10rem" change="showAssetData" valueFormat="MMM dd,yyyy"/>
+						<ToolbarSpacer/>
+						<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
+					</Toolbar>
 				</customHeader>
 				<content>
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5">
@@ -25,9 +23,9 @@
 								<l:GridData span="L12 M12 S12"/>
 							</layoutData>
 						</VBox>
-						<Toolbar visible="{=(${uModel>/adm})?true:false}">
+						<Toolbar visible="{=(${uModel>/adm})?true:false}" design="Transparent">
 							<ToolbarSpacer/>
-							<Button type="Accept" text="Add" icon="sap-icon://add-product" press="onAddSrc"/>
+							<Button type="Ghost" text="Add" icon="sap-icon://add-product" press="onAddSrc"/>
 						</Toolbar>
 						<List id="idList" items="{aModel>/}" growing="true" growingThreshold="25" growingScrollToLoad="true">
 							<ObjectListItem title="{aModel>src}" number="{path: 'aModel>bal', formatter:'.formatter.numberFormat_1'}" type="Active"
