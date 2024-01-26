@@ -5,7 +5,7 @@
 		<pages>
 			<Page title="DB" class="sapUiSizeCompact" showNavButton="true" navButtonPress="onNavBack">
 				<customHeader>
-					<Bar>
+				<!--	<Bar>
 						<contentLeft>
 							<VBox>
 								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
@@ -17,7 +17,21 @@
 								<core:Item key="{lModel>key}" text="{lModel>text}"/>
 							</Select>
 						</contentMiddle>
-					</Bar>
+					</Bar>-->
+					
+						<Toolbar>
+							<VBox>
+								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
+							</VBox>
+						
+						<ToolbarSpacer/>
+							<Select id="idSelDB" items="{lModel>/}" selectedKey="ytd" change="onChangeDB">
+								<core:Item key="{lModel>key}" text="{lModel>text}"/>
+							</Select>
+						<ToolbarSpacer/>
+					<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
+					</Toolbar>
+					
 				</customHeader>
 				<content>
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5" height="100%">
@@ -51,7 +65,7 @@
 						</VBox>
 						<viz:Popover id="idPopOver"></viz:Popover>
 						<VBox visible="{=${dModel>/lnAmtDB}.length>0 ? true : false}" class="classVZVB">
-							<FlexBox justifyContent="Center">
+							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Amount Disbursed:" class="bold classVZTit"/>
 								<Title text="&#8377;{path: 'dModel>/lamtTit', formatter:'.formatter.numberFormat'}"
 									class="classVZTit sapUiTinyMarginBegin"/>
@@ -77,7 +91,7 @@
 							</layoutData>
 						</VBox>
 						<VBox visible="{=${dModel>/accDB}.length>0 ? true : false}" class="classVZVB">
-							<FlexBox justifyContent="Center">
+							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Total Accounts:" class="bold classVZTit"/>
 								<Title text="{path: 'dModel>/accTit', formatter:'.formatter.numberFormat'}"
 									class="classVZTit sapUiTinyMarginBegin"/>
@@ -103,7 +117,7 @@
 							</layoutData>
 						</VBox>
 						<VBox visible="{=${dModel>/expDB}.length>0 ? true : false}" class="classVZVB">
-							<FlexBox justifyContent="Center">
+							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Total Expense:" class="bold classVZTit"/>
 								<Title text="&#8377;{path: 'dModel>/expTit', formatter:'.formatter.numberFormat'}"
 									class="classVZTit sapUiTinyMarginBegin"/>
@@ -129,7 +143,7 @@
 							</layoutData>
 						</VBox>
 						<VBox visible="{=${dModel>/sumDB}.length>0 ? true : false}" class="classVZVB">
-							<FlexBox justifyContent="Center">
+							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Summary" class="bold classVZTit"/>
 							</FlexBox>
 							<viz:VizFrame id="idSumVF"  height='90rem' width="100%" vizType='dual_horizontal_combination'>
