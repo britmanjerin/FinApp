@@ -1,31 +1,25 @@
-<mvc:View controllerName="FabFinV3.c.View2" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc"
-	displayBlock="true" xmlns="sap.m" xmlns:t="sap.ui.table" xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns:cm="FabFinV3.u">
+<mvc:View controllerName="FabFinV3.c.View2" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+	xmlns="sap.m" xmlns:t="sap.ui.table" xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns:cm="FabFinV3.u">
 	<App>
 		<pages>
 			<Page title="Customer" class="sapUiSizeCompact" showNavButton="true" navButtonPress="onNavBack">
 				<customHeader>
-					<Bar>
-						<contentLeft>
-							<VBox visible="{=!${mModel>/roi} ? false : true}">
-								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
-							</VBox>
-							<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginBegin"/>
-						</contentLeft>
-						<contentMiddle>
-							<Title text="Ref No: {cModel>/refNo}" titleStyle="H4"/>
-						</contentMiddle>
-						<contentRight>
-							<core:Icon src="sap-icon://user-edit" press="onEditCust" class="sapUiSmallMarginEnd" visible="{=${uModel>/adm}}"/>
-						</contentRight>
-					</Bar>
+					<Toolbar>
+						<VBox visible="{=!${mModel>/roi} ? false : true}">
+							<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
+						</VBox>
+						<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginBegin"/>
+						<ToolbarSpacer/>
+						<Title text="Ref No: {cModel>/refNo}" titleStyle="H4"/>
+						<ToolbarSpacer/>
+						<core:Icon src="sap-icon://user-edit" press="onEditCust" class="sapUiSmallMarginEnd" visible="{=${uModel>/adm}}"/>
+					</Toolbar>
 				</customHeader>
 				<content>
 					<PullToRefresh id="pullToRefresh" refresh="handleRefresh"/>
-					
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5">
-					
-						<ObjectHeader icon="{= !${iModel>/dp} ? 'sap-icon://customer' : ${iModel>/dp}}" imageShape="Circle" title="{cModel>/name}" number="&#8377;{path: 'cModel>/lnAmt', formatter:'.formatter.numberFormat'}" 
-						numberUnit="">
+						<ObjectHeader icon="{= !${iModel>/dp} ? 'sap-icon://customer' : ${iModel>/dp}}" imageShape="Circle" title="{cModel>/name}"
+							number="&#8377;{path: 'cModel>/lnAmt', formatter:'.formatter.numberFormat'}" numberUnit="">
 							<statuses>
 								<ObjectStatus text="{cModel>/goldGms} gms" active="true" press="showGoldDetails"/>
 								<ObjectStatus inverted="true" id="idObjStatus"
@@ -37,14 +31,13 @@
 								<ObjectStatus id="idDefAmt" state="Error" visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? true : false}"/>
 							</statuses>
 							<markers>
-								<cm:CustomMarker type="Unsaved" 
-										visible="{=(${cModel>/preKey}) ? true : false}"/>
-									<cm:CustomMarker class="classGoldAuc" type="Flagged" 
-										visible="{=(${cModel>/goldAuctn}) ? true : false}"/>
+								<cm:CustomMarker type="Unsaved" visible="{=(${cModel>/preKey}) ? true : false}"/>
+								<cm:CustomMarker class="classGoldAuc" type="Flagged" visible="{=(${cModel>/goldAuctn}) ? true : false}"/>
 							</markers>
-						<!--	<ObjectAttribute text="Ref No.: {cModel>/refNo}"/>-->
+							<!--	<ObjectAttribute text="Ref No.: {cModel>/refNo}"/>-->
 							<ObjectAttribute title="Loan Date" text="{cModel>/lnDt}"/>
-							<ObjectAttribute text="Closed on: {path:'cModel>/clsDt',formatter:'.formatter.dateFormat_1'}" visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? true : false}"/>
+							<ObjectAttribute text="Closed on: {path:'cModel>/clsDt',formatter:'.formatter.dateFormat_1'}"
+								visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? true : false}"/>
 							<ObjectAttribute title="ID" text="{cModel>/id}" active="true" press="clickIDNo"/>
 							<ObjectAttribute title="Phone" text="{cModel>/mob}" active="true" press="clickPhone"/>
 							<ObjectAttribute title="Address" text="{cModel>/addr}"/>
@@ -60,10 +53,10 @@
 							<headerToolbar>
 								<OverflowToolbar height="2.5rem" visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}" design="Info">
 									<content>
-										<Button id="idNotBtn" type="Accept" icon="sap-icon://marketing-campaign" text="Notice" press="onUpdateNot" visible="false"/>
+										<Button id="idNotBtn" type="Ghost" icon="sap-icon://marketing-campaign" text="Notice" press="onUpdateNot" visible="false"/>
 										<ToolbarSpacer/>
-										<Button type="Accept" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt_c}}"/>
-										<Button type="Accept" icon="sap-icon://paid-leave" text="Add" press="onAddInst"/>
+										<Button type="Ghost" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt_c}}"/>
+										<Button type="Ghost" icon="sap-icon://paid-leave" text="Add" press="onAddInst"/>
 									</content>
 								</OverflowToolbar>
 							</headerToolbar>
@@ -71,7 +64,7 @@
 								<Column>
 									<Text text="Installment" class="white_c bold"/>
 								</Column>
-							<!--	<Column minScreenWidth="Tablet" demandPopin="true">
+								<!--	<Column minScreenWidth="Tablet" demandPopin="true">
 									<Text text="Principal" class="white_c bold"/>
 								</Column>-->
 								<Column minScreenWidth="Tablet" demandPopin="true">
@@ -93,10 +86,11 @@
 										<Text
 											text="{parts:[{ path: 'cModel>no'},{ path: 'cModel>/lnDur'},{path:'refreshModel>/r'}] , formatter: 'FabFinV3.c.View2.prototype.formatter.highlightRow' }"
 											class="bold"/>
-									<!--	<Text text="{cModel>prA}"/>-->
+										<!--	<Text text="{cModel>prA}"/>-->
 										<Text text="&#8377;{=${cModel>/lnCls}=== 'X' ? ${cModel>int} : ${cModel>int}-${cModel>cfInt}}"/>
 										<ObjectHeader class="classObjHdrTab" number="&#8377;{=(${cModel>int}) - ${cModel>amtPaid} > 0 ? (${cModel>int} - ${cModel>amtPaid}) : 0}"
-											numberUnit=""><!--{path: 'cModel>/lnAmt', formatter:'.formatter.numberFormat'}      (${cModel>int}) - ${cModel>amtPaid})--> 
+											numberUnit="">
+											<!--{path: 'cModel>/lnAmt', formatter:'.formatter.numberFormat'}      (${cModel>int}) - ${cModel>amtPaid})-->
 											<statuses>
 												<ObjectStatus
 													text="{path: 'cModel>instDt', type:'sap.ui.model.odata.type.DateTime', formatOptions: { style: 'medium' , pattern: 'MMM dd,YYYY'}}"/>
