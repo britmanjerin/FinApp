@@ -10,7 +10,7 @@
 						<Input id="idInpUsr"/>
 						<Title text="Password" titleStyle="H4"/>
 						<Input id="idInpPswd" type="Password" change="onLogin"/>
-						<Button icon="sap-icon://visits" type="Accept" text="Login" press="onLogin" class="sapUiTinyMarginTop" />
+						<Button icon="sap-icon://visits" type="Ghost" text="Login" press="onLogin" class="sapUiTinyMarginTop" />
 					</VBox>
 				
 				</content>
