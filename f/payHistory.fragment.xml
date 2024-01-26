@@ -25,7 +25,7 @@
 							<Text text="&#8377;{path: 'cModel>apAmt', formatter:'.formatter.numberFormat'}"/>
 						</HBox>
 					</VBox>
-					<Toolbar height="2rem" class="sapUiTinyMarginTop">
+					<Toolbar height="2rem" class="sapUiTinyMarginTop" design="Transparent">
 						<Text text="Payment History" class="bold"/>
 					</Toolbar>
 					<t:Table rows="{cModel>hist/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
