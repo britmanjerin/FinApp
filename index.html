@@ -14,7 +14,7 @@
  *
  * Date: 2023-09-17T03:44:17.565Z
  */.cropper-container{direction:ltr;font-size:0;line-height:0;position:relative;-ms-touch-action:none;touch-action:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.cropper-container img{backface-visibility:hidden;display:block;height:100%;image-orientation:0deg;max-height:none!important;max-width:none!important;min-height:0!important;min-width:0!important;width:100%}.cropper-canvas,.cropper-crop-box,.cropper-drag-box,.cropper-modal,.cropper-wrap-box{bottom:0;left:0;position:absolute;right:0;top:0}.cropper-canvas,.cropper-wrap-box{overflow:hidden}.cropper-drag-box{background-color:#fff;opacity:0}.cropper-modal{background-color:#000;opacity:.5}.cropper-view-box{display:block;height:100%;outline:1px solid #39f;outline-color:rgba(51,153,255,.75);overflow:hidden;width:100%}.cropper-dashed{border:0 dashed #eee;display:block;opacity:.5;position:absolute}.cropper-dashed.dashed-h{border-bottom-width:1px;border-top-width:1px;height:33.33333%;left:0;top:33.33333%;width:100%}.cropper-dashed.dashed-v{border-left-width:1px;border-right-width:1px;height:100%;left:33.33333%;top:0;width:33.33333%}.cropper-center{display:block;height:0;left:50%;opacity:.75;position:absolute;top:50%;width:0}.cropper-center:after,.cropper-center:before{background-color:#eee;content:" ";display:block;position:absolute}.cropper-center:before{height:1px;left:-3px;top:0;width:7px}.cropper-center:after{height:7px;left:0;top:-3px;width:1px}.cropper-face,.cropper-line,.cropper-point{display:block;height:100%;opacity:.1;position:absolute;width:100%}.cropper-face{background-color:#fff;left:0;top:0}.cropper-line{background-color:#39f}.cropper-line.line-e{cursor:ew-resize;right:-3px;top:0;width:5px}.cropper-line.line-n{cursor:ns-resize;height:5px;left:0;top:-3px}.cropper-line.line-w{cursor:ew-resize;left:-3px;top:0;width:5px}.cropper-line.line-s{bottom:-3px;cursor:ns-resize;height:5px;left:0}.cropper-point{background-color:#39f;height:5px;opacity:.75;width:5px}.cropper-point.point-e{cursor:ew-resize;margin-top:-3px;right:-3px;top:50%}.cropper-point.point-n{cursor:ns-resize;left:50%;margin-left:-3px;top:-3px}.cropper-point.point-w{cursor:ew-resize;left:-3px;margin-top:-3px;top:50%}.cropper-point.point-s{bottom:-3px;cursor:s-resize;left:50%;margin-left:-3px}.cropper-point.point-ne{cursor:nesw-resize;right:-3px;top:-3px}.cropper-point.point-nw{cursor:nwse-resize;left:-3px;top:-3px}.cropper-point.point-sw{bottom:-3px;cursor:nesw-resize;left:-3px}.cropper-point.point-se{bottom:-3px;cursor:nwse-resize;height:20px;opacity:1;right:-3px;width:20px}@media (min-width:768px){.cropper-point.point-se{height:15px;width:15px}}@media (min-width:992px){.cropper-point.point-se{height:10px;width:10px}}@media (min-width:1200px){.cropper-point.point-se{height:5px;opacity:.75;width:5px}}.cropper-point.point-se:before{background-color:#39f;bottom:-50%;content:" ";display:block;height:200%;opacity:0;position:absolute;right:-50%;width:200%}.cropper-invisible{opacity:0}.cropper-bg{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA3NCSVQICAjb4U/gAAAABlBMVEXMzMz////TjRV2AAAACXBIWXMAAArrAAAK6wGCiw1aAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAABFJREFUCJlj+M/AgBVhF/0PAH6/D/HkDxOGAAAAAElFTkSuQmCC")}.cropper-hide{display:block;height:0;position:absolute;width:0}.cropper-hidden{display:none!important}.cropper-move{cursor:move}.cropper-crop{cursor:crosshair}.cropper-disabled .cropper-drag-box,.cropper-disabled .cropper-face,.cropper-disabled .cropper-line,.cropper-disabled .cropper-point{cursor:not-allowed}
-			/* Enter your custom styles here */
+		/* Enter your custom styles here */
 
 .classDt .sapMInputBaseInner {
     pointer-events: none;
@@ -42,9 +42,26 @@
     font-weight: bold!important;
 }
 
-.sapMPage,
-.sapMDialogSection {
-    background: linear-gradient(to right bottom, #e6ffe6, #dcefff)!important;
+.sapMPage,.sapMDialogSection
+ {
+   /* background: linear-gradient(to right bottom, #e6ffe6, #dcefff)!important;*/
+   	background: linear-gradient(to bottom,#c2d0e7,#f1f6ff)!important
+}
+
+.sapMObjectAttributeDiv .sapMText{
+	color:#1d2d3e!important;
+}
+
+.sapMPage:after{
+	content: "";
+  background: url("/britmanjerin/FinApp/main/Fiori.PNG");
+  opacity: 0.2;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1; 
 }
 
 .sapMDialog .sapMHeader-CTX {
@@ -56,15 +73,18 @@
     padding: 0rem!important;
 }
 
+
 .sapMLIB.sapMObjLItem {
-    padding: 0.5rem!important;
-    background: rgb(171 226 171 / 25%);
+    padding: 0.2rem!important;
+    /*background: rgb(171 226 171 / 25%);*/
+    background: transparent;
     border-bottom: 1px solid #7eae7e!important;
 }
 
 .sapUiTableContentCell,
 .sapMPopoverCont {
-    background: rgb(171 226 171 / 25%)!important;
+    /*background: rgb(171 226 171 / 25%)!important;*/
+    	background: linear-gradient(to bottom,#c2d0e7,#f1f6ff)!important
 }
 
 .sapMNLIB {
@@ -74,7 +94,16 @@
 
 .sapMObjStatus {
     white-space: inherit!important;
-    height: auto!important;
+    /*height: auto!important;*/
+}
+
+.sapMObjStatusInverted .sapMObjStatusText{
+	padding-top:0rem!important;
+	padding-bottom:0rem!important;
+}
+
+.sapMOH .sapMOHAttr .sapMObjectAttributeTitle, .sapMOH .sapMOHAttr .sapMObjectAttributeText, .sapMOH .sapMOHAttr .sapMObjectAttributeColon{
+	color:#1d2d3e;
 }
 
 .classStatuslist .sapMObjStatusText {
@@ -91,11 +120,13 @@
 
 .sapMListTblSubRow,
 .sapMListTblRow {
-    background: rgb(171 226 171 / 25%)!important;
+ /*background: rgb(175 192 224 / 25%)!important;*/
+    background: transparent!important;
 }
 
 .sapMListTbl .classHighlightGreen {
-    background: rgb(171 226 171 / 40%)!important;
+    /*background: rgb(171 226 171 / 40%)!important;*/
+    background:rgb(175 192 224 / 43%)!important;
 }
 
 .sapMListTbl .classOpacity {
@@ -122,7 +153,7 @@
 
 .classLnExpPdAttr .sapMText,
 .classLnExpPdAttr .sapMObjectAttributeText {
-    color: #ff9a06!important;
+    color: #e76500!important;
     font-weight: bold!important;
     white-space: break-spaces;
 }
@@ -163,37 +194,49 @@ div[class*="sapUiRespGrid"]>div[class*="sapUiRespGridSpan"] {
     color: #666!important;
 }
 
-
-.classVZVB{
-	border: 1px solid #b6aeae;
+.classVZVB {
+    border: 1px solid #b6aeae;
     border-radius: 10px;
     margin: 0.3rem;
     box-shadow: 3px 3px #b6aeae;
-    background: linear-gradient(to right bottom, #e6ffe6, #dcefff);
+    /*background: linear-gradient(to right bottom, #e6ffe6, #dcefff);*/
+    background:linear-gradient(to bottom,#e0eaf5,#f5f6f7);
 }
-.classVZTit{
-	top:1rem;
-}
-.classVZVBT{
-	padding-top: 0.15rem;
-    padding-bottom: 0.15rem
 
+.classVZTit {
+    /*top: 1rem;*/
 }
+
+.classVZVBT {
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem
+}
+
 .v-info::before {
     display: none;
 }
 
-.green{
-	color:#2b7c2b!important;
+.viz-plot-background
+{
+	fill:transparent!important;
 }
 
-.blue{
-	color:#346187!important;
+.classVZTitB
+{
+	top:0.5rem;
 }
 
-.red{
-	color:#b00!important;
-	}
+.green {
+    color: #2b7c2b!important;
+}
+
+.blue {
+    color: #346187!important;
+}
+
+.red {
+    color: #b00!important;
+}
 
 .classStDueAmt::after {
     content: attr(data-content);
@@ -226,8 +269,7 @@ div[class*="sapUiRespGrid"]>div[class*="sapUiRespGridSpan"] {
 .classCL{
 	background: transparent!important;
     border-bottom: none!important;
-}
-
+}	
 		</style>
 
 		<link rel="icon" type="image/x-icon" href="/britmanjerin/FinApp/main/favIco.ico">
