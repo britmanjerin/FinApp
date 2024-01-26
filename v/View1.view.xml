@@ -4,34 +4,29 @@
 		<pages>
 			<Page title="Finance" class="sapUiSizeCompact">
 				<customHeader>
-					<Bar>
-						<contentLeft>
-							<core:Icon src="sap-icon://person-placeholder" press="onPressUser" class="sapUiSmallMarginBegin"/>
-						</contentLeft>
-						<contentMiddle>
-							<Title text="JJB Finance" titleStyle="H4"/>
-						</contentMiddle>
-						<contentRight>
-							<core:Icon id="idStopTR" src="sap-icon://stop" press=".onTestRun('S')" class="sapUiSmallMarginEnd" visible="false"/>
-						</contentRight>
-					</Bar>
+					<Toolbar>
+						<core:Icon src="sap-icon://person-placeholder" press="onPressUser" class="sapUiSmallMarginBegin"/>
+						<ToolbarSpacer/>
+						<Title text="JJB Finance" titleStyle="H4"/>
+						<ToolbarSpacer/>
+						<core:Icon id="idStopTR" src="sap-icon://stop" press=".onTestRun('S')" class="sapUiSmallMarginEnd" visible="false"/>
+					</Toolbar>
 				</customHeader>
 				<content>
 					<PullToRefresh id="pullToRefresh" refresh="handleRefresh"/>
 					<!--<Image id="idImg" visible="{=${uModel>/adm}}"/>-->
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5">
-						<OverflowToolbar height="2.5rem" visible="{=!${mModel>/roi} ? false : true}">
+						<OverflowToolbar height="2.5rem" visible="{=!${mModel>/roi} ? false : true}" design="Transparent">
 							<CheckBox id="idFilter" text="All" selected="false" select="onFilterData" visible="false"/>
-							
-								<Button  type="Accept" icon="sap-icon://filter" press="showFOP"/>
-							
+							<Button type="Ghost" icon="sap-icon://filter" press="showFOP"/>
 							<ToolbarSpacer/>
-							<Button type="Accept" icon="sap-icon://appointment" text="Schedule" press="onUpdatePW" visible="{=${uModel>/adm} || ${config>/paySchl}}"/>
-							<Button type="Accept" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt}}"/>
-							<Button type="Accept" icon="sap-icon://add-employee" text="Add" press=".onAddCust(false)"/>
+							<Button type="Ghost" icon="sap-icon://appointment" text="Schedule" press="onUpdatePW" visible="{=${uModel>/adm} || ${config>/paySchl}}"/>
+							<Button type="Ghost" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt}}"/>
+							<Button type="Ghost" icon="sap-icon://add-employee" text="Add" press=".onAddCust(false)"/>
 						</OverflowToolbar>
 						<List id="idList" items="{oModel>/}" growing="true" growingThreshold="25" growingScrollToLoad="true">
-							<ObjectListItem title="{oModel>name}" type="Active" press=".onNav(${oModel>})" number="&#8377;{path: 'oModel>lnAmt', formatter:'.formatter.numberFormat'}" numberUnit="">
+							<ObjectListItem title="{oModel>name}" type="Active" press=".onNav(${oModel>})"
+								number="&#8377;{path: 'oModel>lnAmt', formatter:'.formatter.numberFormat'}" numberUnit="">
 								<firstStatus>
 									<ObjectStatus text="{oModel>goldGms} gms"/>
 								</firstStatus>
@@ -42,7 +37,8 @@
 								<ObjectAttribute text="Ref No.: {oModel>refNo}"/>
 								<ObjectAttribute text="Loan Date: {oModel>lnDt}"/>
 								<ObjectAttribute text=""/>
-								<ObjectAttribute text="Closed on: {path:'oModel>clsDt',formatter:'.formatter.dateFormat_1'}" visible="{=(${oModel>lnCls}=== 'X'||${oModel>lnRen}=== 'X') ? true : false}"/>
+								<ObjectAttribute text="Closed on: {path:'oModel>clsDt',formatter:'.formatter.dateFormat_1'}"
+									visible="{=(${oModel>lnCls}=== 'X'||${oModel>lnRen}=== 'X') ? true : false}"/>
 								<ObjectAttribute
 									text="{ parts: [{ path: 'oModel>lnDt' },{ path: 'oModel>lnDur' }], formatter: 'FabFinV3.c.View1.prototype.formatter.setLnExpTxt' }"
 									visible="{=(${oModel>lnCls}=== 'X'||${oModel>lnRen}=== 'X') ? false : true}"/>
