@@ -160,7 +160,7 @@ sap.ui.define([
 
 				],
 				endButton: new sap.m.Button({
-					type: sap.m.ButtonType.Accept,
+					type: sap.m.ButtonType.Ghost,
 					text: 'Ok',
 					enabled: true,
 					press: function() {
@@ -177,6 +177,7 @@ sap.ui.define([
 					}
 				}),
 				beginButton: new sap.m.Button({
+					type: sap.m.ButtonType.Ghost,
 					text: 'Cancel',
 					press: function() {
 						dialog.close();
