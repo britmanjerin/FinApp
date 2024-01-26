@@ -4,17 +4,15 @@
 		<pages>
 			<Page title="Expense" class="sapUiSizeCompact" showNavButton="true" navButtonPress="onNavBack">
 				<customHeader>
-					<Bar>
-						<contentLeft>
-							<VBox>
-								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
-							</VBox>
-							<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginBegin"/>
-						</contentLeft>
-						<contentMiddle>
-							<Title text="Expense" titleStyle="H4"/>
-						</contentMiddle>
-					</Bar>
+					<Toolbar>
+						<VBox>
+							<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
+						</VBox>
+						<ToolbarSpacer/>
+						<Title text="Expense" titleStyle="H4"/>
+						<ToolbarSpacer/>
+						<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
+					</Toolbar>
 				</customHeader>
 				<content>
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5">
@@ -48,11 +46,11 @@
 								<l:GridData span="L3 M4 S6"/>
 							</layoutData>
 						</VBox>
-						<Toolbar class="sapUiSmallMarginTop">
+						<Toolbar class="sapUiSmallMarginTop" design="Transparent">
 							<Label text="Total Expense:" class="bold"/>
 							<Text id="idTotTxt" class="bold"/>
 							<ToolbarSpacer/>
-							<Button type="Accept" text="Add" icon="sap-icon://create-form" press="onAddExp"/>
+							<Button type="Ghost" text="Add" icon="sap-icon://create-form" press="onAddExp"/>
 						</Toolbar>
 						<List id="idList" items="{eModel>/}" growing="true" growingThreshold="25" growingScrollToLoad="true">
 							<ObjectListItem title="{eModel>desc}" number="₹{path: 'eModel>amt', formatter:'.formatter.numberFormat'}" numberUnit="">
