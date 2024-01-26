@@ -111,7 +111,7 @@
 					<VBox>
 						<FlexBox justifyContent="Start">
 							<Label text="Gold (gms):" labelFor="idGoldgm"/>
-							<core:Icon src="sap-icon://add-product" press="onAddGoldItems" class="sapUiSmallMarginBegin"/>
+							<core:Icon src="sap-icon://add-product" press="onAddGoldItems" class="sapUiSmallMarginBegin" color="#0064d9"/>
 						</FlexBox>
 						<Input id="idGoldgm" required="true" type="Number" value="{oDialogModel>/goldGms}" change=".calculateEMI('G')"/>
 						<layoutData>
@@ -176,7 +176,7 @@
 		</content>
 		<buttons>
 			<Button type="Ghost" text="Close" press="onClose" class="sapUiTinyMarginEnd"/>
-			<Button id="idAddBtn" type="Accept" text="Add" press="cAddCust" class="sapUiTinyMarginEnd"/>
+			<Button id="idAddBtn" type="Ghost" text="Add" press="cAddCust" class="sapUiTinyMarginEnd"/>
 		</buttons>
 		<beginButton></beginButton>
 		<endButton></endButton>
