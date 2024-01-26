@@ -65,7 +65,7 @@
 		</content>
 		<buttons>
 			<Button type="Ghost" text="Close" press="onClose" class="sapUiTinyMarginEnd"/>
-			<Button type="Accept" text="Update" press="cUpdateUC" class="sapUiTinyMarginEnd"/>
+			<Button type="Ghost" text="Update" press="cUpdateUC" class="sapUiTinyMarginEnd"/>
 		</buttons>
 		<beginButton></beginButton>
 		<endButton></endButton>
