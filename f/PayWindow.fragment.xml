@@ -32,7 +32,7 @@
 						</layoutData>
 					</VBox>
 					<HBox justifyContent="End">
-						<Button type="Accept" icon="sap-icon://add-calendar" text="Add" press="onAddPW"/>
+						<Button type="Ghost" icon="sap-icon://add-calendar" text="Add" press="onAddPW"/>
 					</HBox>
 					<t:Table rows="{pwDialogModel>/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
 						rowActionCount="1" enableCellFilter="true">
@@ -68,7 +68,7 @@
 		</content>
 		<buttons>
 			<Button type="Ghost" text="Close" press="onClose" class="sapUiTinyMarginEnd"/>
-			<Button type="Accept" text="Update" press="cUpdatePW" class="sapUiTinyMarginEnd"/>
+			<Button type="Ghost" text="Update" press="cUpdatePW" class="sapUiTinyMarginEnd"/>
 		</buttons>
 		<beginButton></beginButton>
 		<endButton></endButton>
