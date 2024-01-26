@@ -212,7 +212,7 @@ sap.ui.define([
 						e.addStyleClass("classHighlightGreen");
 						try {
 							//	$("#" + e.getId() + "-sub").css("background", "#ebffeb");
-							$("#" + e.getId() + "-sub").attr('style', 'background: rgb(171 226 171 / 40%)!important');
+							$("#" + e.getId() + "-sub").attr('style', 'background: rgb(175 192 224 / 40%)!important');
 						} catch (err) {}
 					}
 
