@@ -92,7 +92,7 @@
 		</content>
 		<buttons>
 			<Button type="Ghost" text="Close" press="onCl" class="sapUiTinyMarginEnd"/>
-			<Button type="Accept" text="Add" press="onSubmit" class="sapUiTinyMarginEnd"/>
+			<Button type="Ghost" text="Add" press="onSubmit" class="sapUiTinyMarginEnd"/>
 		</buttons>
 		<beginButton></beginButton>
 		<endButton></endButton>
