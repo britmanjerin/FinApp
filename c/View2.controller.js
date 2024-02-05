@@ -873,7 +873,7 @@ sap.ui.define([
 
 				this.updateFile(oData);
 				if (!pfa) {
-					this.loadBalDet(payAmt, cData);
+					this.loadBalDet(payAmt, cData, sap.ui.getCore().byId("idOn").getSelected());
 				}
 
 				this.onCl();
@@ -881,7 +881,7 @@ sap.ui.define([
 			}
 		},
 
-		loadBalDet: function(payAmt, cData) {
+		loadBalDet: function(payAmt, cData, isOn) {
 
 			var that = this;
 			$.ajax({
@@ -894,26 +894,32 @@ sap.ui.define([
 					var data = atob(odata.content);
 					data = data.trim() ? JSON.parse(data) : [];
 					if (data.length != 0) {
-						that.updateBal(odata.sha, payAmt, data, cData);
+						that.updateBal(odata.sha, payAmt, data, cData, isOn);
 					}
 				},
 				error: function(oError) {}
 			});
 		},
 
-		updateBal: function(sha, amt, assetData, lnData) {
-
+		updateBal: function(sha, amt, assetData, lnData, isOn) {
+			var obj = {
+				desc: "Credited from " + lnData.name + " (Ref No." + lnData.refNo + ")",
+				amt: amt,
+				dt: Date.now().toString()
+			};
+			var ps, ext;
 			for (var i in assetData) {
 				if (assetData[i].ps) {
-					assetData[i].hist.push({
-						desc: "Credited from " + lnData.name + " (Ref No." + lnData.refNo + ")",
-						amt: amt,
-						dt: Date.now().toString()
-					})
-					break;
+					ps = i;
+				}
+				if (assetData[i].ext) {
+					ext = i;
 				}
 			}
-
+			ext = ext ? ext : ps;
+			ps = isOn ? ext : ps;
+			assetData[ps].hist.push(obj)
+		
 			var url = this.asseturl;
 			var body = {
 				message: "Updating file",
