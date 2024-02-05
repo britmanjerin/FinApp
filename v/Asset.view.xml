@@ -9,9 +9,10 @@
 							<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
 						</VBox>
 						<ToolbarSpacer/>
+						<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
 						<DatePicker id="idDt" class="classDt" width="10rem" change="showAssetData" valueFormat="MMM dd,yyyy"/>
 						<ToolbarSpacer/>
-						<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
+						<core:Icon src="sap-icon://save" press="onBkpFile" visible="{=(${uModel>/adm})?true:false}" class="sapUiSmallMarginEnd"/>
 					</Toolbar>
 				</customHeader>
 				<content>
@@ -32,7 +33,7 @@
 								press=".showTrans(${aModel>})" numberUnit="Available balance" visible="{=(${aModel>ps}||${uModel>/adm})?true:false}"
 								numberState="{=Number(${aModel>bal})>0?'None':'Error'}">
 								<firstStatus>
-									<ObjectStatus text="{=${aModel>ps}?'Primary':''}" inverted="true" state="Information"/>
+									<ObjectStatus text="{aModel>txt}" inverted="true" state="{=(${aModel>txt} === 'Primary')?'Information':'None'}"/>
 								</firstStatus>
 								<secondStatus>
 									<ObjectStatus icon="sap-icon://delete" active="true" press="onDelAsset" visible="{=(${uModel>/adm})?true:false}"/>
