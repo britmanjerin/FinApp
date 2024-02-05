@@ -14,10 +14,13 @@
 			<VBox class="sapUiTinyMargin">
 				<List items="{trans>/hist/}" growing="true" growingThreshold="25" growingScrollToLoad="true">
 					<ObjectListItem title="{trans>desc}" number="{path: 'trans>amt', formatter:'.formatter.numberFormat_1'}" numberUnit=""
-						numberState="{=Number(${trans>amt})>0?'Success':'Error'}">
+						numberState="{=Number(${trans>amt})>0?'Success':'Error'}" class="classTrList">
 						<firstStatus>
-							<ObjectStatus text="{trans>rem}" state="Success"/>
+							<ObjectStatus text="Curr. bal: {path: 'trans>avail', formatter:'.formatter.numberFormat_1'}" state="Warning" class="italic"/>
 						</firstStatus>
+						<secondStatus>
+							<ObjectStatus text="Prev. bal: {path: 'trans>prv', formatter:'.formatter.numberFormat_1'}" state="None" class="italic"/>
+						</secondStatus>
 						<ObjectAttribute text="{path: 'trans>dt', formatter:'.formatter.dateFormat_1'}"/>
 					</ObjectListItem>
 				</List>
