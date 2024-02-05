@@ -148,7 +148,8 @@ sap.ui.define([
 
 		setdbModel: function(key) {
 			key = this.dbd[key];
-			var obj = {};
+			var obj = {},
+				that = this;
 			obj.rev = ((key.amtp + key.adAmtf) - key.clam);
 			obj.exp = key.exp;
 			obj.mgn = obj.rev ? ((obj.rev - obj.exp) / obj.rev) * 100 : 0;
@@ -192,6 +193,8 @@ sap.ui.define([
 				}).format(e.id);
 				tObj.rev = ((e.amtp + e.adAmtf) - e.clam);
 				tObj.exp = e.exp;
+				tObj.prft = tObj.rev - tObj.exp;
+				tObj.prft = tObj.prft > 0 ? that.formatter.numberFormat_1(tObj.prft) : "";
 				tObj.mgn = tObj.rev ? ((tObj.rev - tObj.exp) / tObj.rev) * 100 : 0;
 				tObj.mgn = Math.round(tObj.mgn > 100 ? 100 : tObj.mgn < -100 ? -100 : tObj.mgn);
 				obj.sumDB.push(tObj);
@@ -220,12 +223,14 @@ sap.ui.define([
 		setSumVizProp: function(vf, tit) {
 			// Format.numericFormatter(ChartFormatter.getInstance());
 			// var formatPattern = ChartFormatter.DefaultPattern;
-
+			var that = this;
 			var formatterInstance = ChartFormatter.getInstance();
 			Format.numericFormatter(formatterInstance);
 
 			formatterInstance.registerCustomFormatter("INR_Long", function(value) {
-				var fixedFloat = sap.ui.core.format.NumberFormat.getCurrencyInstance({minFractionDigits:0},new sap.ui.core.Locale("en-in"));
+				var fixedFloat = sap.ui.core.format.NumberFormat.getCurrencyInstance({
+					minFractionDigits: 0
+				}, new sap.ui.core.Locale("en-in"));
 				return fixedFloat.format(value);
 			});
 			formatterInstance.registerCustomFormatter("INR_Short", function(value) {
@@ -247,7 +252,7 @@ sap.ui.define([
 				}
 				//	if (val >= 100000) return '${(value / 100000).toFixed(2)}L'
 				return value;
-			})
+			});
 
 			vf.setVizProperties({
 				plotArea: {
@@ -256,7 +261,18 @@ sap.ui.define([
 						visible: true,
 						formatString: "INR_Short",
 						renderer: function(val) {
-							val.text = val['info'].key === "Margin" ? val.text + "%" : "\u20B9" + val.text;
+							var prft = "";
+							try {
+								for (var x in that.dModel.getData().sumDB) {
+									if (that.dModel.getData().sumDB[x].dim === val.ctx.Month) {
+										if (that.dModel.getData().sumDB[x].prft) {
+											prft = " (" + that.dModel.getData().sumDB[x].prft + ")";
+										}
+										break;
+									}
+								}
+							} catch (err) {}
+							val.text = val['info'].key === "Margin" ? val.text + "%" + prft : "\u20B9" + val.text;
 						}
 					},
 					dataShape: {
@@ -336,7 +352,9 @@ sap.ui.define([
 			Format.numericFormatter(formatterInstance);
 
 			formatterInstance.registerCustomFormatter("INR_Long", function(value) {
-				var fixedFloat = sap.ui.core.format.NumberFormat.getCurrencyInstance({minFractionDigits:0},new sap.ui.core.Locale("en-in"));
+				var fixedFloat = sap.ui.core.format.NumberFormat.getCurrencyInstance({
+					minFractionDigits: 0
+				}, new sap.ui.core.Locale("en-in"));
 				return fixedFloat.format(value);
 			});
 			formatterInstance.registerCustomFormatter("INR_Short", function(value) {
