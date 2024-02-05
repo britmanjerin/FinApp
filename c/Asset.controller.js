@@ -79,9 +79,11 @@ sap.ui.define([
 					}
 					var data = atob(odata.content);
 					data = data.trim() ? JSON.parse(data) : [];
+
 					data.sort((a, b) => {
 						return new Date(Number(b.key)) - new Date(Number(a.key));
 					});
+
 					that.data = data;
 					that.showAssetData();
 					sap.ui.core.BusyIndicator.hide();
@@ -104,18 +106,29 @@ sap.ui.define([
 				arr = [], stot = 0;
 				e.hist.forEach(function(el) {
 					if (new Date(that.formatter.dateFormat_1(el.dt)) <= new Date(dt)) {
-						tot += Number(el.amt);
+						if (!e.ext) {
+							tot += Number(el.amt);
+						}
 						stot += Number(el.amt);
 						arr.push(el);
 					}
 				});
-				
+
 				arr.sort((a, b) => {
-						return new Date(Number(b.dt)) - new Date(Number(a.dt));
-					});
-				
+					return new Date(Number(a.dt)) - new Date(Number(b.dt));
+				});
+
+				var prv = 0;
+				arr.forEach(function(e) {
+					e.prv = prv;
+					e.avail = prv + Number(e.amt);
+					prv = prv + Number(e.amt);
+				});
+				arr = arr.reverse();
+
 				e.hist = arr;
 				e.bal = stot;
+				e.txt = e.ps ? "Primary" : e.ext ? "External" : "" ;
 			});
 
 			this.byId("idTot").setText(that.formatter.numberFormat_1(tot));
@@ -151,11 +164,15 @@ sap.ui.define([
 					}),
 					new sap.m.FlexBox({
 						justifyContent: "End",
-						items: [new sap.m.CheckBox("idCS", {
-							text: "Primary"
-						}), new sap.m.CheckBox("idBank", {
-							text: "Bank"
-						})]
+						items: [
+							new sap.m.CheckBox("idExt", {
+								text: "External"
+							}), new sap.m.CheckBox("idCS", {
+								text: "Primary"
+							}), new sap.m.CheckBox("idBank", {
+								text: "Bank"
+							})
+						]
 					})
 
 				],
@@ -168,8 +185,9 @@ sap.ui.define([
 						var sBal = sap.ui.getCore().byId('submitDialogAmt').getValue();
 						var ib = sap.ui.getCore().byId('idBank').getSelected() ? "X" : "";
 						var ps = sap.ui.getCore().byId('idCS').getSelected() ? "X" : "";
+						var ext = sap.ui.getCore().byId('idExt').getSelected() ? "X" : "";
 						if (sText.trim().length > 0) {
-							that.cAddSrc(sText, sBal, ib, ps);
+							that.cAddSrc(sText, sBal, ib, ps, ext);
 							dialog.close();
 							return;
 						}
@@ -191,13 +209,14 @@ sap.ui.define([
 			dialog.open();
 
 		},
-		cAddSrc: function(src, bal, ib, ps) {
+		cAddSrc: function(src, bal, ib, ps, ext) {
 
 			var obj = {
 				key: Date.now().toString(),
 				src: src,
 				ib: ib,
 				ps: ps,
+				ext: ext,
 				hist: [{
 					desc: "Opening Balance",
 					amt: bal,
@@ -482,6 +501,7 @@ sap.ui.define([
 				success: function(odata) {
 					window.assetsha = JSON.parse(odata).content.sha;
 					sap.ui.core.BusyIndicator.hide();
+					that.byId("idDt").setValue();
 					that.loadAssetData();
 					def.resolve();
 				},
@@ -490,6 +510,14 @@ sap.ui.define([
 					sap.ui.core.BusyIndicator.hide();
 				}
 			});
+		},
+		
+		onBkpFile: function() {
+			var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data));
+			this.formatter.downloadFile(dataStr, "Trans_Backup", );
+			if (this._oPopover) {
+				this._oPopover.close();
+			}
 		},
 
 		onNavLP: function(obj) {
