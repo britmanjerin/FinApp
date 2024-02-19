@@ -747,7 +747,7 @@ sap.ui.define([
 
 				var amtToPay = Number(sap.ui.getCore().byId("idTot").getText());
 
-				if (Math.abs(amtToPay - Number(payAmt)) > 100) {
+				if ((Math.abs(amtToPay - Number(payAmt)) > 100) && !sap.ui.getCore().byId("idAdjust").getSelected()) {
 					MessageBox.error("Pending Amount to be collected is " + (amtToPay));
 					return;
 				}
@@ -763,6 +763,12 @@ sap.ui.define([
 
 				if (othrAmt < 0) {
 					cData.defAmt += (-othrAmt);
+				}
+
+				if (sap.ui.getCore().byId("idAdjust").getSelected()) {
+					if (othrAmt < 0) {
+						cData.defAmt = Math.abs(othrAmt);
+					}
 				}
 
 				if (Number(sap.ui.getCore().byId("idAPamt").getText()) > 0) {
@@ -919,7 +925,7 @@ sap.ui.define([
 			ext = ext ? ext : ps;
 			ps = isOn ? ext : ps;
 			assetData[ps].hist.push(obj)
-		
+
 			var url = this.asseturl;
 			var body = {
 				message: "Updating file",
