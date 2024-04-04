@@ -524,17 +524,18 @@ sap.ui.define([
 								}
 								//new
 							}
-						});
+						}); 
 					});
 					if (new Date(new Date().toDateString()) >= e.id && new Date(new Date().toDateString()) <= e.ed) {
 						ky = "m";
 						for (z; z >= 0; z--) {
 							ytd[ky] ? ytd[ky].push(oy[io][ky][z]) : ytd[ky] = [oy[io][ky][z]];
 						}
+					
 						try {
-							z = 11;
+							z = 0;
 							while (ytd[ky].length < 12 && oy[Object.keys(oy)[Object.keys(oy).indexOf(String(io)) - 1]]) {
-								ytd[ky].push(oy[Object.keys(oy)[Object.keys(oy).indexOf(String(io)) - 1]][ky][z]), z--;
+								ytd[ky].push(oy[Object.keys(oy)[Object.keys(oy).indexOf(String(io)) - 1]][ky][z]), z++;
 							}
 						} catch (err) {}
 					}
