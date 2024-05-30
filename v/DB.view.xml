@@ -5,33 +5,17 @@
 		<pages>
 			<Page title="DB" class="sapUiSizeCompact" showNavButton="true" navButtonPress="onNavBack">
 				<customHeader>
-				<!--	<Bar>
-						<contentLeft>
-							<VBox>
-								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
-							</VBox>
-							<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginBegin"/>
-						</contentLeft>
-						<contentMiddle>
-							<Select id="idSelDB" items="{lModel>/}" selectedKey="ytd" change="onChangeDB">
-								<core:Item key="{lModel>key}" text="{lModel>text}"/>
-							</Select>
-						</contentMiddle>
-					</Bar>-->
-					
-						<Toolbar>
-							<VBox>
-								<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
-							</VBox>
-						
+					<Toolbar>
+						<VBox>
+							<core:Icon src="sap-icon://nav-back" press="onNavBack" class="sapUiSmallMarginBegin"/>
+						</VBox>
 						<ToolbarSpacer/>
-							<Select id="idSelDB" items="{lModel>/}" selectedKey="ytd" change="onChangeDB">
-								<core:Item key="{lModel>key}" text="{lModel>text}"/>
-							</Select>
+						<Select id="idSelDB" items="{lModel>/}" selectedKey="ytd" change="onChangeDB">
+							<core:Item key="{lModel>key}" text="{lModel>text}"/>
+						</Select>
 						<ToolbarSpacer/>
-					<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
+						<core:Icon id="idStopTR" src="sap-icon://stop" press="onTestRun" visible="false" class="sapUiMediumMarginEnd"/>
 					</Toolbar>
-					
 				</customHeader>
 				<content>
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5" height="100%">
@@ -67,10 +51,9 @@
 						<VBox visible="{=${dModel>/lnAmtDB}.length>0 ? true : false}" class="classVZVB">
 							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Amount Disbursed:" class="bold classVZTit"/>
-								<Title text="&#8377;{path: 'dModel>/lamtTit', formatter:'.formatter.numberFormat'}"
-									class="classVZTit sapUiTinyMarginBegin"/>
+								<Title text="&#8377;{path: 'dModel>/lamtTit', formatter:'.formatter.numberFormat'}" class="classVZTit sapUiTinyMarginBegin"/>
 							</FlexBox>
-							<viz:VizFrame id="idAmtVF"  height="15rem" width="100%" vizType='donut' selectData=".onSelectVF($event,'idAmtVF')">
+							<viz:VizFrame id="idAmtVF" height="15rem" width="100%" vizType='donut' selectData=".onSelectVF($event,'idAmtVF')">
 								<viz:dataset>
 									<viz.data:FlattenedDataset data="{dModel>/lnAmtDB}">
 										<viz.data:dimensions>
@@ -93,10 +76,9 @@
 						<VBox visible="{=${dModel>/accDB}.length>0 ? true : false}" class="classVZVB">
 							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Total Accounts:" class="bold classVZTit"/>
-								<Title text="{path: 'dModel>/accTit', formatter:'.formatter.numberFormat'}"
-									class="classVZTit sapUiTinyMarginBegin"/>
+								<Title text="{path: 'dModel>/accTit', formatter:'.formatter.numberFormat'}" class="classVZTit sapUiTinyMarginBegin"/>
 							</FlexBox>
-							<viz:VizFrame id="idAccVF"  height="15rem" width="100%" vizType='donut'>
+							<viz:VizFrame id="idAccVF" height="15rem" width="100%" vizType='donut'>
 								<viz:dataset>
 									<viz.data:FlattenedDataset data="{dModel>/accDB}">
 										<viz.data:dimensions>
@@ -119,10 +101,9 @@
 						<VBox visible="{=${dModel>/expDB}.length>0 ? true : false}" class="classVZVB">
 							<FlexBox justifyContent="Center" class="classVZTitB">
 								<Title text="Total Expense:" class="bold classVZTit"/>
-								<Title text="&#8377;{path: 'dModel>/expTit', formatter:'.formatter.numberFormat'}"
-									class="classVZTit sapUiTinyMarginBegin"/>
+								<Title text="&#8377;{path: 'dModel>/expTit', formatter:'.formatter.numberFormat'}" class="classVZTit sapUiTinyMarginBegin"/>
 							</FlexBox>
-							<viz:VizFrame id="idExpVF"  height="15rem" width="100%" vizType='donut'>
+							<viz:VizFrame id="idExpVF" height="15rem" width="100%" vizType='donut'>
 								<viz:dataset>
 									<viz.data:FlattenedDataset data="{dModel>/expDB}">
 										<viz.data:dimensions>
@@ -143,10 +124,65 @@
 							</layoutData>
 						</VBox>
 						<VBox visible="{=${dModel>/sumDB}.length>0 ? true : false}" class="classVZVB">
-							<FlexBox justifyContent="Center" class="classVZTitB">
+							<VBox alignItems="Center" class="classVZTitB">
 								<Title text="Summary" class="bold classVZTit"/>
-							</FlexBox>
-							<viz:VizFrame id="idSumVF"  height='90rem' width="100%" vizType='dual_horizontal_combination'>
+								<Title text="({dModel>/avgInv/dtRg})" class="bold classVZTit"/>
+							</VBox>
+							<!--	<viz:VizFrame id="idSumVF2"  width="100%" vizType='dual_vertical_combination' >
+								<viz:dataset>
+									<viz.data:FlattenedDataset data="{dModel>/sumDB}">
+										<viz.data:dimensions>
+											<viz.data:DimensionDefinition name="Month" value="{dModel>dim}"/>
+										</viz.data:dimensions>
+										<viz.data:measures>
+											<viz.data:MeasureDefinition name="Revenue" value="{dModel>rev}"/>
+											<viz.data:MeasureDefinition name="Expense" value="{dModel>exp}"/>
+											<viz.data:MeasureDefinition name="Margin" value="{dModel>mgn}"/>
+										</viz.data:measures>
+									</viz.data:FlattenedDataset>
+								</viz:dataset>
+								<viz:feeds>
+									<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Revenue,Expense"/>
+									<viz.feeds:FeedItem uid="valueAxis2" type="Measure" values="Margin"/>
+									<viz.feeds:FeedItem id="feedCategoryAxis" uid="categoryAxis" type="Dimension" values="Month"/>
+								</viz:feeds>
+							</viz:VizFrame>
+							-->
+							<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5" height="100%" class="sapUiTinyMarginTop">
+								<VBox width="90%" alignItems="Center" justifyContent="Center" class="classVZVB classVZVBT">
+									<Title text="Revenue" class=""/>
+									<Text text="&#8377;{path: 'dModel>/avgInv/rev', formatter:'.formatter.numberFormat'}" class="green"/>
+									<layoutData>
+										<l:GridData span="L6 M6 S6"/>
+									</layoutData>
+								</VBox>
+								<VBox width="90%" alignItems="Center" justifyContent="Center" class="classVZVB classVZVBT">
+									<Title text="Expense" class=""/>
+									<Text text="&#8377;{path: 'dModel>/avgInv/exp', formatter:'.formatter.numberFormat'}" class="blue"/>
+									<layoutData>
+										<l:GridData span="L6 M6 S6"/>
+									</layoutData>
+								</VBox>
+							</l:Grid>
+							<viz:VizFrame id="idSumVF1" height='15rem' width="100%" vizType='dual_combination'>
+								<viz:dataset>
+									<viz.data:FlattenedDataset data="{dModel>/avgInv/sumDB}">
+										<viz.data:dimensions>
+											<viz.data:DimensionDefinition name="Name" value="{dModel>dim}"/>
+										</viz.data:dimensions>
+										<viz.data:measures>
+											<viz.data:MeasureDefinition name="Revenue" value="{dModel>rev}"/>
+											<viz.data:MeasureDefinition name="Interest" value="{dModel>int}"/>
+										</viz.data:measures>
+									</viz.data:FlattenedDataset>
+								</viz:dataset>
+								<viz:feeds>
+									<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Revenue"/>
+									<viz.feeds:FeedItem uid="valueAxis2" type="Measure" values="Interest"/>
+									<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Name"/>
+								</viz:feeds>
+							</viz:VizFrame>
+							<viz:VizFrame id="idSumVF" height='90rem' width="100%" vizType='dual_horizontal_combination' uiConfig="{applicationSet:'fiori'}">
 								<viz:dataset>
 									<viz.data:FlattenedDataset data="{dModel>/sumDB}">
 										<viz.data:dimensions>
