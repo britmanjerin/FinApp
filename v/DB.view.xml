@@ -149,9 +149,9 @@
 							</viz:VizFrame>
 							-->
 							<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5" height="100%" class="sapUiTinyMarginTop">
-								<VBox width="90%" alignItems="Center" justifyContent="Center" class="classVZVB classVZVBT">
-									<Title text="Revenue" class=""/>
-									<Text text="&#8377;{path: 'dModel>/avgInv/rev', formatter:'.formatter.numberFormat'}" class="green"/>
+								<VBox width="95%" alignItems="Center" justifyContent="Center" class="classVZVB classVZVBT">
+									<Title text="Avg. Investment" class=""/>
+									<Text text="&#8377;{path: 'dModel>/avgInv/avgInv', formatter:'.formatter.numberFormat'}" class="green"/>
 									<layoutData>
 										<l:GridData span="L6 M6 S6"/>
 									</layoutData>
