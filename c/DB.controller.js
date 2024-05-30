@@ -5,7 +5,9 @@ sap.ui.define([
 	"sap/m/MessageBox",
 	'sap/viz/ui5/format/ChartFormatter',
 	'sap/viz/ui5/api/env/Format',
-], function(BaseController, JSONModel, formatter, MessageBox, ChartFormatter, Format) {
+	"sap/ui/core/format/DateFormat",
+	"sap/ui/core/HTML"
+], function(BaseController, JSONModel, formatter, MessageBox, ChartFormatter, Format, DateFormat, HTMLControl) {
 	"use strict";
 
 	return BaseController.extend("FabFinV3.c.db", {
@@ -17,8 +19,8 @@ sap.ui.define([
 			this.lModel = new JSONModel();
 			this.getView().setModel(this.dModel, "dModel");
 			this.getView().setModel(this.lModel, "lModel");
+			this.initVizTooltip();
 			this.getOwnerComponent().getRouter().getRoute("db").attachPatternMatched(this._onObjectMatched, this);
-
 		},
 		_onObjectMatched: function(evt) {
 			if (window.testRun) {
@@ -128,6 +130,7 @@ sap.ui.define([
 
 			$.when(i, j).done(function() {
 				sap.ui.core.BusyIndicator.hide();
+				that.cData = cData;
 				that.dbData(cData, eData);
 				var a = [];
 				Object.keys(that.dbd).forEach(function(e) {
@@ -162,18 +165,8 @@ sap.ui.define([
 			key.cls ? key.ga ? fil(obj.accDB, "Closed", (key.cls - key.ga)) : fil(obj.accDB, "Closed", key.cls) : null;
 			key.ga ? fil(obj.accDB, "Auctioned", (key.ga)) : null;
 			key.ren ? fil(obj.accDB, "Renewed", (key.ren)) : null;
-
-			//	fil(obj.lnAmtDB, "Pending", (key.lamt - key.clam - key.ram));
-			//	fil(obj.lnAmtDB, "Repayment", (key.clam));
-			//	(key.amtp - key.clam) > 0 ? fil(obj.lnAmtDB, "Interest", (key.amtp - key.clam)) : null;
-
-			//new 
-
-			fil(obj.lnAmtDB, "Pending", (key.lamt - key.clam - key.ram - key.adAmt));
-			fil(obj.lnAmtDB, "Repayment", (key.clam + key.adAmt));
-
-			//new
-
+			fil(obj.lnAmtDB, "Outstanding", (key.lamt - key.clam - key.ram - key.adAmt));
+			fil(obj.lnAmtDB, "Settled", (key.clam + key.adAmt));
 			var tObj = {};
 			(key.expa || []).forEach(function(e) {
 				tObj[e.typ] ? tObj[e.typ] += Number(e.amt) : tObj[e.typ] = Number(e.amt);
@@ -188,7 +181,7 @@ sap.ui.define([
 			});
 			key.m.forEach(function(e) {
 				tObj = {};
-				tObj.dim = sap.ui.core.format.DateFormat.getDateInstance({
+				tObj.dim = DateFormat.getDateInstance({
 					pattern: "MMM yyyy"
 				}).format(e.id);
 				tObj.rev = ((e.amtp + e.adAmtf) - e.clam);
@@ -205,12 +198,15 @@ sap.ui.define([
 			obj.expTit = key.exp;
 
 			this.dModel.setData(obj);
+			this.getRevPerct();
+			this.dModel.refresh();
 			this.setVizProp(this.byId("idAccVF"), ["#6bbd6b", "#e36968", "#ffa556", "#629fcb"], true);
 			this.setVizProp(this.byId("idAmtVF"), ["#00a64c", "#d4c44e"]);
 			this.setVizProp(this.byId("idExpVF"), ["#95dd91", "#ba90dc", "#ffc186", "#ddd990", "#d95e01", "#6bbd6b", "#e36968", "#ffa556",
 				"#629fcb", "#b8a1e7"
 			]);
 			this.setSumVizProp(this.byId("idSumVF"), "Summary");
+			this.setSumVizProp(this.byId("idSumVF1"), "Summary", 1);
 
 			function fil(arr, d, m) {
 				arr.push({
@@ -220,7 +216,7 @@ sap.ui.define([
 			}
 		},
 
-		setSumVizProp: function(vf, tit) {
+		setSumVizProp: function(vf, tit, yf) {
 			// Format.numericFormatter(ChartFormatter.getInstance());
 			// var formatPattern = ChartFormatter.DefaultPattern;
 			var that = this;
@@ -254,94 +250,187 @@ sap.ui.define([
 				return value;
 			});
 
-			vf.setVizProperties({
-				plotArea: {
-					dataLabel: {
-						type: "value",
-						visible: true,
-						formatString: "INR_Short",
-						renderer: function(val) {
-							var prft = "";
-							try {
-								for (var x in that.dModel.getData().sumDB) {
-									if (that.dModel.getData().sumDB[x].dim === val.ctx.Month) {
-										if (that.dModel.getData().sumDB[x].prft) {
-											prft = " (" + that.dModel.getData().sumDB[x].prft + ")";
+			if (!yf) {
+				vf.setVizProperties({
+					plotArea: {
+						dataLabel: {
+							type: "value",
+							visible: true,
+							formatString: "INR_Short",
+							renderer: function(val) {
+								var prft = "";
+								try {
+									for (var x in that.dModel.getData().sumDB) {
+										if (that.dModel.getData().sumDB[x].dim === val.ctx.Month) {
+											if (that.dModel.getData().sumDB[x].prft) {
+												prft = " (" + that.dModel.getData().sumDB[x].prft + ")";
+											}
+											break;
 										}
-										break;
 									}
-								}
-							} catch (err) {}
-							val.text = val['info'].key === "Margin" ? val.text + "%" + prft : "\u20B9" + val.text;
-						}
-					},
-					dataShape: {
-						primaryAxis: ["bar", "bar", "line"]
-					},
-					drawingEffect: "glossy",
-					primaryValuesColorPalette: ["#008f91", "#e57872"],
-					secondaryValuesColorPalette: ["#1e90ff"]
-				},
-				title: {
-					text: tit,
-					visible: false
-				},
-				tooltip: {
-					formatString: "INR_Long",
-					postRender: function(dom) {
-						try {
-							if ($(dom[0][0]).children().children().children().children()[1].cells[0].textContent.indexOf("Margin") < 0) {
-								var val = "\u20B9" + $(dom[0][0]).children().children().children().children()[1].cells[1].textContent;
-								$(dom[0][0]).children().children().children().children()[1].cells[1].textContent = val;
-							} else {
-								var val = $(dom[0][0]).children().children().children().children()[1].cells[1].textContent + "%";
-								$(dom[0][0]).children().children().children().children()[1].cells[1].textContent = val;
+								} catch (err) {}
+								val.text = val['info'].key === "Margin" ? val.text + "%" + prft : "\u20B9" + val.text;
 							}
-						} catch (err) {
-							console.log(err);
+						},
+						dataShape: {
+							primaryAxis: ["bar", "bar", "line"]
+						},
+						drawingEffect: "glossy",
+						primaryValuesColorPalette: ["#008f91", "#e57872"],
+						secondaryValuesColorPalette: ["#1e90ff"]
+					},
+					title: {
+						text: "Monthly"
+					//	visible: false
+					},
+					tooltip: {
+						formatString: "INR_Long",
+						postRender: function(dom) {
+							try {
+								if ($(dom[0][0]).children().children().children().children()[1].cells[0].textContent.indexOf("Margin") < 0) {
+									var val = "\u20B9" + $(dom[0][0]).children().children().children().children()[1].cells[1].textContent;
+									$(dom[0][0]).children().children().children().children()[1].cells[1].textContent = val;
+								} else {
+									var val = $(dom[0][0]).children().children().children().children()[1].cells[1].textContent + "%";
+									$(dom[0][0]).children().children().children().children()[1].cells[1].textContent = val;
+								}
+							} catch (err) {
+								console.log(err);
+							}
+						}
+					},
+					valueAxis: {
+						title: {
+							visible: false
+						},
+						label: {
+							visible: false
+						}
+					},
+					valueAxis2: {
+						title: {
+							visible: false
+						},
+						label: {
+							visible: false
+						}
+					},
+					categoryAxis: {
+						title: {
+							visible: false
+						},
+						label: {
+							rotation: "fixed",
+							angle: "0"
+						},
+						labelRenderer: function(val) {}
+					},
+					legend: {
+						visible: true
+					},
+					legendGroup: {
+						layout: {
+							alignment: "center",
+							position: "bottom"
 						}
 					}
-				},
-				valueAxis: {
-					title: {
-						visible: false
-					},
-					label: {
-						visible: false
-					}
-				},
-				valueAxis2: {
-					title: {
-						visible: false
-					},
-					label: {
-						visible: false
-					}
-				},
-				categoryAxis: {
-					title: {
-						visible: false
-					},
-					label: {
-						rotation: "fixed",
-						angle: "0"
-					},
-					labelRenderer: function(val) {}
-				},
-				legend: {
-					visible: true
-				},
-				legendGroup: {
-					layout: {
-						alignment: "center",
-						position: "bottom"
-					}
-				}
-			});
+				});
 
-			var oPopOver = this.getView().byId("idPopOver");
-			oPopOver.connect(vf.getVizUid());
-			oPopOver.setFormatString(ChartFormatter.DefaultPattern.STANDARDFLOAT);
+				this.vizPopOver.connect(vf.getVizUid());
+				this.vizPopOver.setFormatString(ChartFormatter.DefaultPattern.STANDARDFLOAT);
+			} else {
+
+				vf.setVizProperties({
+					plotArea: {
+						dataLabel: {
+							type: "value",
+							visible: true,
+							formatString: "INR_Short",
+							renderer: function(val) {
+								try {
+									if (val.info.key === "Revenue") {
+										val.text = "\u20B9" + val.text;
+									} else {
+										val.text = val.text + "%";
+									}
+								} catch (err) {}
+
+							}
+						},
+						dataShape: {
+							primaryAxis: ["bar", "line"]
+						},
+						secondaryScale:{
+							fixedRange:true,
+							maxValue:50,
+							minValue:0
+						},
+						drawingEffect: "glossy",
+						primaryValuesColorPalette: ["#6bbd6b"],
+						secondaryValuesColorPalette: ["#d95e01"]
+					},
+					title: {
+						text: "Yearly"
+					//	visible: false
+					},
+					tooltip: {
+						formatString: "INR_Long",
+						postRender: function(dom) {
+							try {
+								if ($(dom[0][0]).children().children().children().children()[1].cells[0].textContent.indexOf("Interest") < 0) {
+									var val = "\u20B9" + $(dom[0][0]).children().children().children().children()[1].cells[1].textContent;
+									$(dom[0][0]).children().children().children().children()[1].cells[1].textContent = val;
+								} else {
+									var val = $(dom[0][0]).children().children().children().children()[1].cells[1].textContent + "%";
+									$(dom[0][0]).children().children().children().children()[1].cells[1].textContent = val;
+								}
+							} catch (err) {
+								console.log(err);
+							}
+						}
+					},
+					valueAxis: {
+						title: {
+							visible: false
+						},
+						label: {
+							visible: false
+						},
+						layout: {
+							width: 1
+						}
+					},
+					valueAxis2: {
+						title: {
+							visible: false
+						},
+						label: {
+							visible: false
+						}
+					},
+					categoryAxis: {
+						title: {
+							visible: false
+						},
+						label: {
+							rotation: "fixed",
+							angle: "0"
+						},
+						labelRenderer: function(val) {}
+					},
+					legend: {
+						visible: true
+					},
+					legendGroup: {
+						layout: {
+							alignment: "center",
+							position: "bottom"
+						}
+					}
+				});
+
+			}
+
 		},
 
 		setVizProp: function(vf, clr, nf) {
@@ -433,10 +522,53 @@ sap.ui.define([
 				}
 			});
 
-			var oPopOver = this.getView().byId("idPopOver");
-			oPopOver.connect(vf.getVizUid());
-			oPopOver.setFormatString(ChartFormatter.DefaultPattern.STANDARDFLOAT);
+			/*	var oPopOver = this.getView().byId("idPopOver");
+				oPopOver.connect(vf.getVizUid());
+				oPopOver.setFormatString(ChartFormatter.DefaultPattern.STANDARDFLOAT);*/
 
+		},
+
+		initVizTooltip: function() {
+			var that = this;
+			this.vizPopOver = new sap.viz.ui5.controls.Popover({
+				'customDataControl': function(data) {
+					if (data.data.val) {
+						var exData = that.dModel.getData().sumDB;
+						var values = data.data.val,
+							divStr = "",
+							idx = values[1].value;
+						var svg =
+							"<svg width='10px' height='10px'><path d='M-5,-5L5,-5L5,5L-5,5Z' fill='#5cbae6' transform='translate(5,5)'></path></svg>";
+						divStr = divStr + "<div style = 'margin: 15px 30px 10px 10px'>" + svg + "<b style='margin-left:10px'>" + values[0].value +
+							"</b></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Avg. Investment" + "<span style = 'float: right'>" + that.formatter
+							.numberFormat_1(exData[idx].avgInv || 0) + "</span></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Gross Revenue" + "<span style = 'float: right'>" + that.formatter
+							.numberFormat_1(exData[idx].rev || 0) + "</span></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Gross Interest Rate" + " <span style = 'float: right'>" + (
+							exData[idx].grossInt) + " %" + "</span></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Expense" + "<span style = 'float: right'>" + that.formatter
+							.numberFormat_1(exData[idx].exp || 0) + "</span></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Net Revenue" + "<span style = 'float: right'>" + (exData[
+							idx].prft || "₹0") + "</span></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Net Interest Rate" + " <span style = 'float: right'>" + (
+							exData[idx].netInt) + " %" + "</span></div>";
+
+						divStr = divStr + "<div style = 'margin: 5px 30px 10px 30px'>" + "Margin" + "<span style = 'float: right'>" + String(exData[
+							idx].mgn) + " %" + "</span></div>";
+
+						return new HTMLControl({
+							content: divStr
+						});
+					}
+				}
+			});
 		},
 
 		dbData: function(cd, ed) {
@@ -524,14 +656,14 @@ sap.ui.define([
 								}
 								//new
 							}
-						}); 
+						});
 					});
 					if (new Date(new Date().toDateString()) >= e.id && new Date(new Date().toDateString()) <= e.ed) {
 						ky = "m";
 						for (z; z >= 0; z--) {
 							ytd[ky] ? ytd[ky].push(oy[io][ky][z]) : ytd[ky] = [oy[io][ky][z]];
 						}
-					
+
 						try {
 							z = 0;
 							while (ytd[ky].length < 12 && oy[Object.keys(oy)[Object.keys(oy).indexOf(String(io)) - 1]]) {
@@ -583,6 +715,103 @@ sap.ui.define([
 				return vArr;
 			}
 
+		},
+
+		getRevPerct: function(yr) {
+			var cd = $.extend(true, [], this.cData),
+				m = $.extend(true, [], this.dbd[this.byId("idSelDB").getSelectedKey()].m),
+				sumDB = this.dModel.getData().sumDB,
+				tv, td;
+			const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate(),
+				dys = ((yer, mth) => {
+					tv = {};
+					for (var i = 1; i <= daysInMonth(yer, mth); i++) {
+						tv[DateFormat.getDateInstance({
+							pattern: "MMM dd, yyyy"
+						}).format(new Date(yer, mth, i))] = 0;
+					}
+					return tv;
+				});
+			cd = cd.filter(function(el) {
+				return new Date(el.lnDt) <= m[0].ed && new Date(el.clsDt ? new Date(Number(el.clsDt)).toDateString() : "12 31 9999") >= m[11].id
+			});
+			cd.forEach(function(el) {
+				el.adv = {};
+				for (var i = el.payDet.length - 1; i >= 0; i--) {
+					if (el.payDet[i].lnClsr) {
+						el.clsDt = el.payDet[i].payDate;
+					}
+					if (el.payDet[i].apAmt && el.payDet[i].apAmt != 0) {
+						td = DateFormat.getDateInstance({
+							pattern: "MMM dd, yyyy"
+						}).format(new Date(el.payDet[i].payDate));
+						el.adv[td] = el.adv[td] ? el.adv[td] + el.payDet[i].apAmt : el.payDet[i].apAmt;
+					}
+				}
+			});
+			m.forEach(function(e) {
+				e.dys = dys(e.id.getFullYear(), e.m);
+				cd.forEach(function(el) {
+					if (new Date(el.lnDt) <= e.ed && new Date(el.clsDt ? el.clsDt : "12 31 9999") >= e.id) {
+						Object.keys(e.dys).forEach(function(ele) {
+							if (new Date(el.lnDt) <= new Date(ele) && new Date(el.clsDt ? el.clsDt : "12 31 9999") >= new Date(ele)) {
+								if (el.adv[ele]) {
+									el.lnAmt = Number(el.lnAmt) - el.adv[ele];
+								}
+								e.dys[ele] += Number(el.lnAmt);
+							}
+						});
+					}
+				});
+			});
+			tv = {
+				yr: {
+					avgInv: 0,
+					grossInt: 0,
+					netInt: 0,
+					tdys: 0,
+					exp: 0,
+					rev: 0
+				}
+			};
+			m.forEach(function(e) {
+				td = DateFormat.getDateInstance({
+					pattern: "MMM yyyy"
+				}).format(e.id);
+				tv[td] = 0;
+				Object.keys(e.dys).forEach(function(el) {
+					tv[td] += e.dys[el];
+					tv.yr.avgInv += e.dys[el];
+				});
+				tv[td] = Math.round(tv[td] / Object.keys(e.dys).length);
+				tv.yr.tdys += Object.keys(e.dys).length;
+			});
+			tv.yr.avgInv = Math.round((tv.yr.avgInv / tv.yr.tdys));
+			sumDB.forEach(function(e) {
+				tv.yr.exp += e.exp;
+				tv.yr.rev += e.rev;
+				e.avgInv = tv[e.dim];
+				e.grossInt = e.avgInv ? (e.rev / (e.avgInv / 100)) : 0;
+				e.netInt = e.avgInv ? (((e.rev - e.exp) / (e.avgInv / 100))) : 0;
+				e.grossInt = Number(e.grossInt > 0 ? e.grossInt : 0).toFixed(2);
+				e.netInt = Number(e.netInt > 0 ? e.netInt : 0).toFixed(2);
+			});
+			tv.yr.grossInt = tv.yr.avgInv ? ((tv.yr.rev / (tv.yr.avgInv / 100))) : 0;
+			tv.yr.netInt = tv.yr.avgInv ? (((tv.yr.rev - tv.yr.exp) / (tv.yr.avgInv / 100))) : 0;
+			tv.yr.grossInt = Number(tv.yr.grossInt > 0 ? tv.yr.grossInt : 0).toFixed(2);
+			tv.yr.netInt = Number(tv.yr.netInt > 0 ? tv.yr.netInt : 0).toFixed(2);
+			tv.yr.dtRg = sumDB[11].dim + " - " + sumDB[0].dim;
+			tv.yr.sumDB = [{
+				dim: "Gross",
+				rev: tv.yr.rev,
+				int: Number(tv.yr.grossInt)
+			}, {
+				dim: "Net",
+				rev: (tv.yr.rev - tv.yr.exp),
+				int: Number(tv.yr.netInt)
+			}];
+
+			this.dModel.getData().avgInv = tv.yr;
 		},
 
 		onSelectVF: function(oEvent) {
