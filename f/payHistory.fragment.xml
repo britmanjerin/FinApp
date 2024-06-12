@@ -19,6 +19,12 @@
 							<Text text="&#8377;{path: 'cModel>bPrA', formatter:'.formatter.numberFormat'}"/>
 						</HBox>
 					</VBox>
+					<VBox visible="{=${cModel>tpAmt}>0 ? true : false}">
+						<Text text="Top-up Amount" class="sapUiSmallMarginTop bold"/>
+						<HBox class="sapUiTinyMarginTop sapUiTinyMarginBegin">
+							<Text text="&#8377;{path: 'cModel>tpAmt', formatter:'.formatter.numberFormat'}"/>
+						</HBox>
+					</VBox>
 					<VBox visible="{=${cModel>apAmt}>0 ? true : false}">
 						<Text text="Advance Payment" class="sapUiSmallMarginTop bold"/>
 						<HBox class="sapUiTinyMarginTop sapUiTinyMarginBegin">
