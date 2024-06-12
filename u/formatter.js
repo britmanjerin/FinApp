@@ -50,7 +50,7 @@ sap.ui.define([], function() {
 
 			} catch (err) {}
 
-			return val;
+			return sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).format(val);
 		},
 
 		fillGArr: function() {
