@@ -1,0 +1,56 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:t="sap.ui.table">
+	<Dialog title="Top up" class="sapUiContentPadding sapUiSizeCompact" contentWidth="100%" initialFocus="done">
+		<content>
+			<l:Grid defaultSpan="L12 M12 S12" vSpacing="0.5" hSpacing="0.5">
+				<l:content>
+					<VBox>
+						<Text text="Date"/>
+						<DatePicker id="idTPDt" class="classDt" valueFormat="MMM dd,yyyy" />
+						<layoutData>
+							<l:GridData span="L6 M6 S6"/>
+						</layoutData>
+					</VBox>
+					<VBox>
+						<Text text="Amount"/>
+						<Input id="idTPAm" type="Number"/>
+						<layoutData>
+							<l:GridData span="L6 M6 S6"/>
+						</layoutData>
+					</VBox>
+					<HBox justifyContent="End">
+						<Button type="Ghost" icon="sap-icon://create-form" text="Add" press="onAddTopUp"/>
+					</HBox>
+					<t:Table rows="{tpDialogModel>/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
+						rowActionCount="1" enableCellFilter="true">
+						<t:columns>
+							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
+								<Text text="Date" class="white bold" textAlign="Begin" wrapping="false"/>
+								<t:template>
+									<Text text="{tpDialogModel>date}"/>
+								</t:template>
+							</t:Column>
+							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
+								<Text text="Amount" class="white bold" textAlign="Begin" wrapping="false"/>
+								<t:template>
+									<Text text="₹{tpDialogModel>amount}"/>
+								</t:template>
+							</t:Column>
+						</t:columns>
+						<t:rowActionTemplate>
+							<t:RowAction>
+								<t:RowActionItem icon="sap-icon://delete" text="{i18n>delete}" press="onDelTopUp"
+									visible="{=${uModel>/adm}}"/>
+							</t:RowAction>
+						</t:rowActionTemplate>
+					</t:Table>
+				</l:content>
+			</l:Grid>
+		</content>
+		<buttons>
+			<Button type="Ghost" text="Close" press="onClose" class="sapUiTinyMarginEnd"/>
+			<Button type="Ghost" text="Update" press="cUpdateTopUp" class="sapUiTinyMarginEnd"/>
+		</buttons>
+		<beginButton></beginButton>
+		<endButton></endButton>
+	</Dialog>
+</core:FragmentDefinition>
