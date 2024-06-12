@@ -278,8 +278,10 @@ sap.ui.define([
 					var data = atob(odata.content);
 					data = data.trim() ? JSON.parse(data) : [];
 					data.forEach(function(e) {
-						that.formatter.setStatus_h(e, that);
+						var lnObj = that.formatter.setStatus_h(e, that);
 						e.lnDt = that.formatter.dateFormat(new Date(e.lnDt));
+						e.tpAmt = Number(lnObj.tpAmt);
+						e.apAmt = Number(lnObj.advAmt);
 						if (e.nxtInstsDate) {
 							e.nxtInstsDate = new Date(e.nxtInstsDate).toDateString().split(" ").splice(1, 4).join(' ');
 						}
