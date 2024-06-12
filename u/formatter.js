@@ -1,5 +1,6 @@
 sap.ui.define([], function() {
 	"use strict";
+
 	return {
 
 		getExpInstDate: function(date) {
@@ -10,19 +11,23 @@ sap.ui.define([], function() {
 			var date = date.toDateString().split(" ");
 			return date[1] + " " + date[2] + "," + date[3];
 		},
-		
-		numberFormat:function(val1,val2)
-		{
+
+		numberFormat_lnAmt: function(lnAmt, tpAmt, apAmt) {
+			var val = Number(lnAmt) + Number(tpAmt);
+		//	val = val - Number(apAmt);
+			return sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).format(val);
+		},
+
+		numberFormat: function(val1, val2) {
 			var val = val1;
 			return sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).format(val);
 		},
-		
-		numberFormat_1:function(val1)
-		{
+
+		numberFormat_1: function(val1) {
 			var val = val1;
-			var sign = val< 0 ? "- ₹":"₹";
+			var sign = val < 0 ? "- ₹" : "₹";
 			val = Math.abs(val);
-			return sign+sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).format(val);
+			return sign + sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).format(val);
 		},
 
 		dateFormat_1: function(date) {
@@ -32,9 +37,25 @@ sap.ui.define([], function() {
 			}
 		},
 
+		formatAmtVis: function(val) {
+
+			try {
+
+				$.sap.delayedCall(100, this, function() {
+					$($("#" + this.sId).parent().parent()).attr('style', 'display: none!important');
+					if (Number(val) > 0) {
+						$($("#" + this.sId).parent().parent()).removeAttr('style', 'display: none!important');
+					}
+				});
+
+			} catch (err) {}
+
+			return val;
+		},
+
 		fillGArr: function() {
 			var arr = ["Anklet", "Anklet (916)", "Bangle", "Bangle (916)", "Bracelet", "Bracelet (916)", "Chain", "Chain (916)", "Ear Ring",
-				"Ear Ring (916)","Locket","Locket(916)", "Necklace", "Necklace (916)", "Ring", "Ring (916)", "Other", "Other (916)"
+				"Ear Ring (916)", "Locket", "Locket(916)", "Necklace", "Necklace (916)", "Ring", "Ring (916)", "Other", "Other (916)"
 			];
 			var rArr = [];
 			arr.forEach(function(e) {
@@ -63,10 +84,12 @@ sap.ui.define([], function() {
 				var lnCls = instDet;
 
 				var ctrl = filt ? filt.formatter : sap.ui.getCore().byId(this._sOwnerId + "---home").getController().formatter;
-				instDet = ctrl.generateLoanData(instDet, false, this).arr;
+				var lnObj = ctrl.generateLoanData(instDet, false, this);
+				instDet = lnObj.arr;
 				var obj = ctrl.setStatus_f(lnCls, instDet, fObj);
 				if (fObj) {
 					FabFinV3.filterArr.push(fObj);
+					return lnObj;
 				} else {
 					this.getParent().getSecondStatus().setState(obj.status);
 					this.getParent().getAttributes()[2].setText(obj.instDateText);
@@ -171,13 +194,12 @@ sap.ui.define([], function() {
 
 					//	this.byId("idAmtDue").setText(totTxt);
 					retObj.odAmt = 0;
-					
-					if(expFlg)
-						{
-							retObj.odAmt = this.numberFormat(totAmtDue) + "~";
-							retObj.expFlg = expFlg;
-						}
-					
+
+					if (expFlg) {
+						retObj.odAmt = this.numberFormat(totAmtDue) + "~";
+						retObj.expFlg = expFlg;
+					}
+
 					retObj.amtDue = totTxt;
 					retObj.totAmtDue = this.numberFormat(totAmtDue);
 
@@ -312,16 +334,15 @@ sap.ui.define([], function() {
 				var obj = this.formatter.setStatus_f(lnCls, instDet);
 
 				this.byId("idObjStatus").setState(obj.status);
-				
-				var dueTxt=obj.amtDue||"";
+
+				var dueTxt = obj.amtDue || "";
 				dueTxt = dueTxt.replace("Total Amount Due: ", "Total Due: \u20B9");
-				
-				if(obj.odAmt && !obj.expFlg)
-					{
-						dueTxt+= " | "+"Overdue: \u20B9"+obj.odAmt;
-					}
+
+				if (obj.odAmt && !obj.expFlg) {
+					dueTxt += " | " + "Overdue: \u20B9" + obj.odAmt;
+				}
 				this.byId("idAmtDue").setText(dueTxt);
-			//	this.byId("idAmtOvrDue").setText("Overdue Amount: "+obj.odAmt);
+				//	this.byId("idAmtOvrDue").setText("Overdue Amount: "+obj.odAmt);
 				this.byId("idObjInstDate").setState(obj.instDateState);
 				this.byId("idObjInstDate").setText(obj.instDateText);
 
@@ -471,6 +492,7 @@ sap.ui.define([], function() {
 			var pwArr = cModel.pwDet;
 			var data = cModel.payDet;
 			var dat = cModel.lnDt;
+			var tpArr;
 
 			data.sort((a, b) => {
 				return new Date(a.payDate) - new Date(b.payDate);
@@ -487,7 +509,10 @@ sap.ui.define([], function() {
 				//	roi = Number(cModel.roi) / 12 / 100,
 				roi, tRoi,
 				bPrA = prA,
-				cfInt = 0;
+				cfInt = 0,
+				advAmt = 0,
+				tpAmt = 0,
+				tpAddAmt;
 
 			var date = new Date(dat);
 			var instStDt = new Date(dat);
@@ -572,6 +597,52 @@ sap.ui.define([], function() {
 				}
 
 				pObj.instStDt = instStDt.toDateString();
+
+				//new
+
+				tpArr = (cModel.topUp || []).filter((tp) => {
+					return (new Date(tp.date) <= new Date(pObj.intTo) && new Date(tp.date) >= new Date(pObj.intFrm));
+				});
+
+				tpAddAmt = 0;
+
+				if (tpArr.length > 0) {
+					var tpObj = {
+						0: {
+							tpAmt: 0
+						},
+						1: {
+							tpAmt: 0
+						},
+						int: 0
+					};
+					tpArr.forEach(function(x) {
+						tpAmt += Number(x.amount);
+						tpObj.nd = Math.ceil(Math.abs(new Date(x.date) - new Date(pObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
+						if (tpObj.nd > 15) {
+							tpObj[1].tpAmt += Number(x.amount);
+						} else {
+							tpObj[0].tpAmt += Number(x.amount);
+						}
+					});
+
+					pObj.tpAmt = tpObj[1].tpAmt + tpObj[0].tpAmt;
+					bPrA += pObj.tpAmt;
+
+					if (tpObj[1].tpAmt > 0) { //half
+						tpAddAmt += (tpObj[1].tpAmt / 2);
+						pObj.prA += tpAddAmt;
+					}
+					if (tpObj[0].tpAmt > 0) { //full
+						pObj.prA += tpObj[0].tpAmt;
+					}
+
+					pObj.int = Math.round((Number(pObj.prA) * roi) + pObj.cfInt)
+
+				}
+
+				//new
+
 				var prAmt = 0,
 					aiAmt = 0,
 					intExc = false,
@@ -582,15 +653,14 @@ sap.ui.define([], function() {
 					if (new Date(data[j].payDate) <= new Date(pObj.fnPayDt) && new Date(data[j].payDate) >= new Date(pObj.instStDt)) {
 						pObj.amtPaid += Number(data[j].amt);
 						pObj.apAmt += Number(data[j].apAmt || 0);
+						advAmt += Number(data[j].apAmt || 0);;
 
-						//new
 						if (Number(data[j].apAmt || 0) > 0 && !data[j].rflg && data[j].brFlg) {
 							apArr.push({
 								amt: Number(data[j].apAmt || 0),
 								dt: data[j].payDate
 							});
 						}
-						//new
 
 						pObj.payDate = Number(data[j].amt) > 0 ? data[j].payDate : pObj.payDate;
 						pObj.hist.push(data[j]);
@@ -624,14 +694,8 @@ sap.ui.define([], function() {
 
 				instStDt = new Date(new Date(pObj.fnPayDt).getTime() + (1 * 24 * 60 * 60 * 1000));
 
-				/*	if (pObj.amtPaid > pObj.int) {
-						bPrA -= (pObj.amtPaid - pObj.int);
-					}*/
-
 				bPrA -= prAmt;
 				pObj.bPrA = bPrA;
-
-				//new
 
 				if (apArr.length > 0) {
 					var apObj = {
@@ -647,10 +711,8 @@ sap.ui.define([], function() {
 						apObj.nd = Math.ceil(Math.abs(new Date(x.dt) - new Date(pObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
 						if (apObj.nd > 15) {
 							apObj[1].adAmt += x.amt;
-							//	apObj.int = pObj.int;
 						} else {
 							apObj[0].adAmt += x.amt;
-							//	apObj.int = ((pObj.int - pObj.cfInt) / 2) + pObj.cfInt;
 						}
 					});
 
@@ -669,7 +731,9 @@ sap.ui.define([], function() {
 					pObj.bPrA = bPrA;
 				}
 
-				//new
+				if (tpAddAmt > 0) {
+					pObj.prA += tpAddAmt;
+				}
 
 				cfInt = 0;
 				if (pObj.amtPaid < pObj.int) {
@@ -682,8 +746,6 @@ sap.ui.define([], function() {
 					cfInt += pObj.int;
 				}
 
-				//	tmpDate = new Date(new Date(pObj.intTo).getTime() + (1 * 24 * 60 * 60 * 1000)).toDateString();
-
 				if (new Date(cDate) <= new Date(pObj.intTo) && new Date(cDate) >= new Date(pObj.intFrm)) {
 					iEnd = i + 12;
 					currRoi = tRoi;
@@ -693,7 +755,6 @@ sap.ui.define([], function() {
 						FabFinV3.currInst = pObj.no;
 					}
 
-					//	that.byId("idAmtDue").setText ("Total Amount Due: "+pObj.int);
 				}
 
 				pObj.intFrm = new Date(pObj.intFrm);
@@ -734,7 +795,10 @@ sap.ui.define([], function() {
 			var retObj = {
 				arr: pArr,
 				currRoi: currRoi,
-				curDtObj: curDtObj
+				curDtObj: curDtObj,
+				advAmt: advAmt,
+				tpAmt: tpAmt,
+				lnAmt: Number(cModel.lnAmt)
 			}
 
 			return retObj;
