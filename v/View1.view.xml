@@ -26,7 +26,7 @@
 						</OverflowToolbar>
 						<List id="idList" items="{oModel>/}" growing="true" growingThreshold="25" growingScrollToLoad="true">
 							<ObjectListItem title="{oModel>name}" type="Active" press=".onNav(${oModel>})"
-								number="&#8377;{path: 'oModel>lnAmt', formatter:'.formatter.numberFormat'}" numberUnit="">
+								number="₹{ parts: [{ path: 'oModel>lnAmt' }, { path: 'oModel>tpAmt' },{ path: 'oModel>apAmt' }], formatter: '.formatter.numberFormat_lnAmt' }" numberUnit="">
 								<firstStatus>
 									<ObjectStatus text="{oModel>goldGms} gms"/>
 								</firstStatus>
