@@ -356,7 +356,7 @@ sap.ui.define([
 				totAmt += Number(e.amt);
 			});
 			
-			data.topUp.forEach(function(e) {
+			(data.topUp||[]).forEach(function(e) {
 				tpAmt += Number(e.amount);
 			});
 
