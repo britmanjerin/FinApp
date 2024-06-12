@@ -350,14 +350,19 @@ sap.ui.define([
 		calcSummary: function(data) {
 			var totAmt = 0,
 				intAmt = 0,
+				tpAmt = 0,
 				defAmt = data.defAmt;
 			data.payDet.forEach(function(e) {
 				totAmt += Number(e.amt);
 			});
+			
+			data.topUp.forEach(function(e) {
+				tpAmt += Number(e.amount);
+			});
 
 			totAmt += Number(data.advAmt || 0);
 
-			var lnAmt = Number(data.lnAmt);
+			var lnAmt = Number(data.lnAmt)+tpAmt;
 
 			if (data.lnRen) {
 				lnAmt = lnAmt - Number(data.trPra || data.lnAmt);
@@ -402,6 +407,11 @@ sap.ui.define([
 			var lnData = this.formatter.generateLoanData(cModel, true, this);
 
 			cModel.instDet = lnData.arr;
+			cModel.advAmt_1 = lnData.advAmt;
+			cModel.tpAmt = lnData.tpAmt;
+
+			//	cModel.lnAmt = Number(cModel.lnAmt) + cModel.tpAmt;
+
 			var currRoi = lnData.currRoi;
 			var curDtObj = lnData.curDtObj;
 
@@ -473,6 +483,7 @@ sap.ui.define([
 				} else {
 					var intAmt = 0;
 					var curIntdays = Math.ceil(Math.abs(new Date(payDate) - new Date(curDtObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
+
 					if (curIntdays > 15) {
 						intAmt = curDtObj.int;
 					} else {
@@ -483,7 +494,13 @@ sap.ui.define([
 					intAmt = Math.round(intAmt);
 
 					if ((amt + curDtObj.amtPaid) > (intAmt)) {
-						sap.ui.getCore().byId("idAPTxt").setText("₹" + String((amt + curDtObj.amtPaid) - intAmt));
+
+						if (curDtObj.amtPaid >= intAmt) {
+							sap.ui.getCore().byId("idAPTxt").setText("₹" + String(amt));
+						} else {
+							sap.ui.getCore().byId("idAPTxt").setText("₹" + String((amt + curDtObj.amtPaid) - intAmt));
+						}
+
 						sap.ui.getCore().byId("idAPBR").setVisible(true);
 					} else {
 						oEvent.getSource().setSelected(false);
@@ -580,7 +597,7 @@ sap.ui.define([
 					intTD = intTD + curDtObj.cfInt;
 				}
 
-				amtToPay = ((Number(cData.lnAmt) - Number(sap.ui.getCore().byId("idAPamt").getText())) + Number(othrAmt) + intTD - curDtObj.amtPaid);
+				amtToPay = ((Number(cData.lnAmt) + Number(cData.tpAmt) - Number(sap.ui.getCore().byId("idAPamt").getText())) + Number(othrAmt) + intTD - curDtObj.amtPaid);
 			} else if (sap.ui.getCore().byId("idCBR").getSelected()) {
 				//	var lnEndDate = this.formatter.getLnEdDt(new Date(cData.lnDt),Number(cData.lnDur));
 				if (!cData.instDet[Number(cData.lnDur) - 1] || Number(sap.ui.getCore().byId("idAPamt").getText()) > 0) {
@@ -830,6 +847,8 @@ sap.ui.define([
 			if (lnRen) {
 				var copyData = $.extend(true, {}, cData);
 				delete copyData.instDet;
+				delete cData.advAmt_1;
+				delete cData.tpAmt;
 				delete copyData.intTD;
 
 				copyData.lnRen = copyData.clsDt = "";
@@ -863,6 +882,8 @@ sap.ui.define([
 
 				cData.modDt = Date.now().toString();
 				delete cData.instDet;
+				delete cData.advAmt_1;
+				delete cData.tpAmt;
 				delete cData.intTD
 				var oData = this.oModel.getData();
 
@@ -872,18 +893,18 @@ sap.ui.define([
 						break;
 					}
 				}
-
 				if (lnRen) {
 					oData.push(copyData);
 				}
-
 				this.updateFile(oData);
 				if (!pfa) {
-					this.loadBalDet(payAmt, cData, sap.ui.getCore().byId("idOn").getSelected());
+					var that = this;
+					var idOn = sap.ui.getCore().byId("idOn").getSelected();
+					$.sap.delayedCall(100, this, function() {
+						that.loadBalDet(payAmt, cData, idOn);
+					});
 				}
-
 				this.onCl();
-
 			}
 		},
 
@@ -992,6 +1013,9 @@ sap.ui.define([
 				rObj.rflg = "X";
 				cData.payDet.push(rObj);
 				delete cData.instDet;
+				delete cData.advAmt_1;
+				delete cData.tpAmt;
+
 				delete cData.intTD
 				var oData = that.oModel.getData();
 				for (var j in oData) {
@@ -1004,6 +1028,64 @@ sap.ui.define([
 				that.onCl();
 			}
 
+		},
+
+		onAmtTopUp: function() {
+
+			if (this._tpDialog) {
+				this._tpDialog.destroy();
+			}
+			this._tpDialog = sap.ui.xmlfragment("FabFinV3.f.topUp", this);
+			this.getView().addDependent(this._tpDialog);
+			this._tpDialog.setModel(new JSONModel($.extend(true, [], this.cModel.getData().topUp)), "tpDialogModel");
+			sap.ui.getCore().byId("idTPDt").setMinDate(new Date(this.cModel.getData().lnDt));
+			sap.ui.getCore().byId("idTPDt").setMaxDate(new Date());
+			this._tpDialog.open();
+
+		},
+
+		onAddTopUp: function() {
+
+			var date = sap.ui.getCore().byId("idTPDt").getValue();
+			var amount = sap.ui.getCore().byId("idTPAm").getValue();
+
+			if (date && amount > 0) {
+				var model = this._tpDialog.getModel("tpDialogModel").getData();
+				var nwObj = {
+					date: date,
+					amount: amount,
+					modDt: Date.now().toString()
+				};
+				model.push(nwObj);
+				this._tpDialog.getModel("tpDialogModel").refresh();
+			}
+
+		},
+
+		cUpdateTopUp: function() {
+
+			var cData = this.cModel.getData();
+			cData.topUp = this._tpDialog.getModel("tpDialogModel").getData();
+			cData.modDt = Date.now().toString();
+			delete cData.instDet;
+			delete cData.advAmt_1;
+			delete cData.tpAmt;
+			delete cData.intTD
+			var oData = this.oModel.getData();
+			for (var j in oData) {
+				if (oData[j].key === cData.key) {
+					oData.splice(j, 1, cData);
+					break;
+				}
+			}
+			this.updateFile(oData);
+			this.onClose();
+		},
+
+		onDelTopUp: function(oEvent) {
+			this._tpDialog.getModel("tpDialogModel").getData().splice(oEvent.getSource().getBindingContext("tpDialogModel").getPath().split("/")[
+				1], 1);
+			this._tpDialog.getModel("tpDialogModel").refresh();
 		},
 
 		onUpdateInt: function() {
@@ -1053,6 +1135,8 @@ sap.ui.define([
 			cData.roiDet = this._itDialog.getModel("iDialogModel").getData();
 			cData.modDt = Date.now().toString();
 			delete cData.instDet;
+			delete cData.advAmt_1;
+			delete cData.tpAmt;
 			delete cData.intTD
 			var oData = this.oModel.getData();
 
@@ -1175,6 +1259,8 @@ sap.ui.define([
 
 				cData.modDt = Date.now().toString();
 				delete cData.instDet;
+				delete cData.advAmt_1;
+				delete cData.tpAmt;
 				delete cData.intTD
 				var oData = this.oModel.getData();
 
@@ -1208,6 +1294,9 @@ sap.ui.define([
 			}
 			if (this._oDialog) {
 				this._oDialog.destroy();
+			}
+			if (this._tpDialog) {
+				this._tpDialog.destroy();
 			}
 
 		},
@@ -1328,6 +1417,8 @@ sap.ui.define([
 			cData.modDt = Date.now().toString();
 
 			delete cData.instDet;
+			delete cData.advAmt_1;
+			delete cData.tpAmt;
 			delete cData.intTD;
 
 			var oData = this.oModel.getData();
