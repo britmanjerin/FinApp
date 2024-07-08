@@ -17,7 +17,8 @@ sap.ui.define([
 				"Overdue": true,
 				"Payment Due": true,
 				"Loan Closed": false,
-				"Loan Renewed": false
+				"Loan Renewed": false,
+				"filterVal": "",
 			};
 			this.getOwnerComponent().getRouter().getRoute("home").attachPatternMatched(this._onObjectMatched, this);
 			window.mainsha;
@@ -141,6 +142,25 @@ sap.ui.define([
 				obj[e.status] = e.status;
 			});
 			var content = new sap.m.VBox().addStyleClass("sapUiTinyMargin");
+
+			content.addItem(new sap.m.SearchField({
+				placeholder: "Search",
+				value: that.filtOpt.filterVal,
+				search: function(evt) {
+					if (evt.getSource().getValue().trim()) {
+						content.getItems().forEach(function(e) {
+							if (e.getText) {
+								that.filtOpt[e.getText()] = e.getSelected();
+							}
+						});
+						that.filtOpt.sort = true;
+						that.filtOpt.filterVal = evt.getSource().getValue().trim();
+						that.onFOP();
+						p.close();
+					}
+				}
+			}));
+
 			Object.keys(obj).forEach(function(e) {
 				if (e === "Loan Closed" || e === "Loan Renewed") {
 					if (that.uModel.getData().adm || that.getView().getModel("config").getData().filter) {
@@ -157,6 +177,7 @@ sap.ui.define([
 				}
 
 			});
+
 			var p = new sap.m.Popover({
 				showHeader: true,
 				title: "Filter",
@@ -171,13 +192,35 @@ sap.ui.define([
 				}),
 				footer: new sap.m.Toolbar({
 					content: [new sap.m.ToolbarSpacer(), new sap.m.Button({
+						text: "Reset",
+						type: "Transparent",
+						press: function() {
+							content.getItems().forEach(function(e) {
+								that.filtOpt = {
+									"sort": false,
+									"Overdue": true,
+									"Payment Due": true,
+									"Loan Closed": false,
+									"Loan Renewed": false,
+									"filterVal": "",
+								};
+							});
+							that.onFOP();
+							p.close();
+						}
+					}), new sap.m.Button({
 						text: "Ok",
 						type: "Transparent",
 						press: function() {
 							content.getItems().forEach(function(e) {
-								that.filtOpt[e.getText()] = e.getSelected();
+								if (e.getText) {
+									that.filtOpt[e.getText()] = e.getSelected();
+								}else{
+									that.filtOpt.filterVal = e.getValue().trim();
+								}
 							});
 							that.filtOpt.sort = true;
+							
 							that.onFOP();
 							p.close();
 						}
@@ -194,7 +237,7 @@ sap.ui.define([
 			if (this.filtOpt.sort) {
 				var tmpArr,
 					sortArr = [];
-				var oModel = $.extend(true, [], this.getView().getModel("oModel").getData());
+				var oModel = $.extend(true, [], this.mData);
 
 				FabFinV3.filterArr.forEach(function(e) {
 					tmpArr = oModel.filter(function(el) {
@@ -204,6 +247,9 @@ sap.ui.define([
 				});
 
 				this.getView().getModel("oModel").setData(sortArr);
+				this.getView().getModel("oModel").refresh();
+			} else {
+				this.getView().getModel("oModel").setData($.extend(true, [], this.mData));
 				this.getView().getModel("oModel").refresh();
 			}
 
@@ -224,6 +270,21 @@ sap.ui.define([
 				filters: filterArray,
 				and: false
 			});
+
+			if (this.filtOpt.filterVal) {
+				var filterArr2 = [];
+				filterArr2.push(new Filter("refNo", FilterOperator.Contains, this.filtOpt.filterVal));
+				filterArr2.push(new Filter("name", FilterOperator.Contains, this.filtOpt.filterVal));
+				filterArr2 = new Filter({
+					filters: filterArr2,
+					and: false
+				});
+				filterArray = [filterArray, filterArr2];
+				filterArray = new Filter({
+					filters: filterArray,
+					and: true
+				});
+			}
 
 			this.byId("idList").getBinding("items").filter(filterArray);
 		},
@@ -253,7 +314,6 @@ sap.ui.define([
 				headers: this.headers,
 				cache: false,
 				success: function(odata) {
-
 					if (!window.custsha) {
 						window.custsha = odata.sha;
 					} else {
@@ -268,11 +328,9 @@ sap.ui.define([
 									that.loadCustData();
 								});
 							}
-
 							return;
 						}
 						that.rCount1 = 0;
-
 					}
 
 					var data = atob(odata.content);
@@ -291,6 +349,7 @@ sap.ui.define([
 						return b.key - a.key;
 					});
 
+					that.mData = data;
 					that.oModel.setData(data);
 					that.oModel.refresh();
 
@@ -566,7 +625,6 @@ sap.ui.define([
 				MessageBox.error("Kindly verify the Amount entered in Debit source");
 				return;
 			}
-		
 
 			for (var i = nwData.gDet.length - 1; i >= 0; i--) {
 				nwData.gDet[i].flg = nwData.gDet[i].flg ? "X" : "";
@@ -652,7 +710,7 @@ sap.ui.define([
 				data: JSON.stringify(body),
 				dataType: 'text',
 				success: function(odata) {
-				window.assetsha=null;
+					window.assetsha = null;
 				},
 				error: function(odata) {
 
