@@ -53,7 +53,8 @@
 				"sap.collaboration": {},
 				"sap.ui.comp": {},
 				"sap.uxap": {},
-				"sap.ui.table": {}
+				"sap.ui.table": {},
+				"sap.gantt":{}
 			}
 		},
 		"contentDensities": {
