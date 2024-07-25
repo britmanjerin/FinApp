@@ -2191,7 +2191,7 @@ sap.ui.define([
 				obj.row.push({
 					l: "Total Balance",
 					s: ":",
-					d: this.formatter.numberFormat((data.lnAmt + data.tpAmt - data.advAmt_1)) + " INR"
+					d: this.formatter.numberFormat((Number(data.lnAmt) + data.tpAmt - data.advAmt_1)) + " INR"
 				});
 			} else {
 
