@@ -4,7 +4,10 @@ sap.ui.define([
 	"FabFinV3/u/formatter",
 	"sap/m/MessageBox",
 	"sap/m/MessageToast",
-	"sap/m/library"
+	"sap/m/library",
+	"sap/gantt/simple/GanttPrinting",
+	"FabFinV3/l/jspdf_rn",
+	"FabFinV3/l/autotab"
 ], function(BaseController, JSONModel, formatter, MessageBox, MessageToast, mobileLibrary) {
 	"use strict";
 	FabFinV3.URLHelper = mobileLibrary.URLHelper;
@@ -355,14 +358,14 @@ sap.ui.define([
 			data.payDet.forEach(function(e) {
 				totAmt += Number(e.amt);
 			});
-			
-			(data.topUp||[]).forEach(function(e) {
+
+			(data.topUp || []).forEach(function(e) {
 				tpAmt += Number(e.amount);
 			});
 
 			totAmt += Number(data.advAmt || 0);
 
-			var lnAmt = Number(data.lnAmt)+tpAmt;
+			var lnAmt = Number(data.lnAmt) + tpAmt;
 
 			if (data.lnRen) {
 				lnAmt = lnAmt - Number(data.trPra || data.lnAmt);
@@ -597,7 +600,8 @@ sap.ui.define([
 					intTD = intTD + curDtObj.cfInt;
 				}
 
-				amtToPay = ((Number(cData.lnAmt) + Number(cData.tpAmt) - Number(sap.ui.getCore().byId("idAPamt").getText())) + Number(othrAmt) + intTD - curDtObj.amtPaid);
+				amtToPay = ((Number(cData.lnAmt) + Number(cData.tpAmt) - Number(sap.ui.getCore().byId("idAPamt").getText())) + Number(othrAmt) +
+					intTD - curDtObj.amtPaid);
 			} else if (sap.ui.getCore().byId("idCBR").getSelected()) {
 				//	var lnEndDate = this.formatter.getLnEdDt(new Date(cData.lnDt),Number(cData.lnDur));
 				if (!cData.instDet[Number(cData.lnDur) - 1] || Number(sap.ui.getCore().byId("idAPamt").getText()) > 0) {
@@ -1739,6 +1743,560 @@ sap.ui.define([
 					MessageBox.error("Failed.")
 				}
 			});
+		},
+
+		exportPDF: function() {
+			var tab = this.getTabData();
+			var doc = new jsPDF('p', 'pt', 'a4');
+			var defOpt = this.getDefaultOption(doc);
+			var options = $.extend(true, {}, defOpt);
+			var totalPagesExp = "{total_pages_count_string}";
+			var buffer = $.Deferred();
+			this.getImageData(sap.ui.require.toUrl("FabFinV3/i/Icon.png"), buffer);
+			$.when(buffer).done(function(img) {
+				doc.internal.events.subscribe('addPage', function() {
+					doc.setFillColor("#fff9ff");
+					doc.rect(0, 0, doc.getPageWidth(), doc.getPageHeight(), "F");
+				});
+				doc.addPage()
+				doc.deletePage(1)
+				var pageContent = function(data) {
+					//Header
+					doc.addImage(img, 'JPEG', 10, 9, 35, 35);
+					doc.setFontSize(20);
+					doc.setTextColor("#6d426d");
+					doc.text("JJB Finance", 55, 36);
+
+					//Footer
+
+					var str = String(doc.getNumberOfPages());
+					if (typeof doc.putTotalPages === 'function') {
+						str = str + " / " + totalPagesExp;
+					}
+					doc.setFontSize(10);
+					doc.setTextColor("#1d2d3e");
+					doc.text(str, 10, doc.getPageHeight() - 10);
+				};
+
+				doc.autoTable(tab.cust.head, [], options);
+				options.startY = doc.lastAutoTable.finalY;
+				doc.autoTable(tab.cust.col, tab.cust.row, options);
+
+				options.startY = doc.lastAutoTable.finalY + 15;
+				doc.autoTable(tab.acc.head, [], options);
+				options.startY = doc.lastAutoTable.finalY;
+				doc.autoTable(tab.acc.col, tab.acc.row, options);
+				options.startY = doc.lastAutoTable.finalY + 15;
+
+				options.didDrawPage = pageContent;
+				doc.autoTable(tab.stmt.head, [], options);
+				options.startY = doc.lastAutoTable.finalY;
+				doc.autoTable(tab.stmt.col, tab.stmt.row, options);
+
+				if (doc.lastAutoTable.finalY > 650) {
+					doc.addPage();
+					options.startY = null;
+				} else {
+					options.startY = doc.lastAutoTable.finalY + 10;
+				}
+
+				//		options.tableWidth = doc.getPageWidth() / 2;
+				doc.autoTable(tab.sum.head, [], options);
+				options.startY = doc.lastAutoTable.finalY + 5;
+				options.tableWidth = (doc.getPageWidth() / 3) - 15;
+
+				options.headStyles = {
+					fillColor: "#fff9ff",
+					textColor: "#5a5150",
+					fontStyle: 'bold'
+				};
+				options.alternateRowStyles = {
+					fillColor: "#fff9ff"
+				}
+				options.styles = {
+					fillColor: "#fff9ff",
+					fontStyle: 'bold',
+					cellPadding : 2
+				}
+				var stY = 0;
+				tab.sum.tab.forEach(function(e, i) {
+					if (i > 0) {
+						options.margin.left = (doc.getPageWidth() / 2.5);
+						stY = doc.lastAutoTable.finalY + 15;
+					}
+					doc.autoTable(e.col, e.row, options);
+				});
+
+				options.margin.left = 15;
+				options.tableWidth = "auto";
+				options.headStyles = defOpt.headStyles;
+				options.styles =  defOpt.styles;
+				options.alternateRowStyles = defOpt.alternateRowStyles;
+				options.startY = stY;
+				doc.autoTable(tab.gold.head, [], options);
+				options.startY = doc.lastAutoTable.finalY;
+				doc.autoTable(tab.gold.col, tab.gold.row, options);
+				options.startY = doc.lastAutoTable.finalY;
+
+				doc.setDocumentProperties({
+					"title": tab.title
+				});
+
+				doc.putTotalPages("{total_pages_count_string}");
+				doc.save(tab.title);
+			});
+
+		},
+
+		getDefaultOption: function(doc) {
+			return {
+				margin: {
+					top: 60,
+					left: 15,
+					right: 15,
+					bottom: 40
+				},
+				tableLineWidth: 0,
+				styles: {
+					cellPadding: 3
+				},
+				headStyles: {
+					fillColor: "#d8bfd8", //"#6d426d",
+					textColor: "#6d426d",
+					fontStyle: 'bold'
+				},
+				alternateRowStyles: {
+					fillColor: "#fbeffb"
+				},
+				didParseCell: function(data, opts) {
+					data.cell.styles.lineWidth = {
+						top: 0,
+						bottom: 0,
+						right: 0,
+						left: 0
+					};
+					data.cell.styles.halign = "left";
+					if (data.column.raw.title === "Credit (INR)" || data.column.raw.title === "Debit (INR)") {
+						data.cell.styles.halign = "right";
+						if (data.column.raw.title != data.cell.text) {
+							if (data.column.raw.title === "Credit (INR)") {
+								data.cell.styles.textColor = "#256f3a";
+							} else {
+								data.cell.styles.textColor = "#aa0808";
+							}
+						}
+					}
+					if (data.column.raw.title === "Status") {
+						data.cell.styles.halign = "center";
+					}
+					if (data.column.raw.title.indexOf("Details") >= 0 || data.column.raw.title === "Summary") {
+						data.cell.styles.fillColor = "#6d426d";
+						data.cell.styles.textColor = "#ffffff";
+					}
+					/*	if (data.column.raw.title === "Status") {
+							if (data.cell.text != "Status") {
+								data.cell.text = "";
+							}
+						}*/
+
+					if (data.column.raw.title === "Status") {
+						var tcol = "#ffffff",
+							col;
+						switch (data.cell.raw) {
+							case "Active":
+								col = "#fb8c00";
+								break;
+							case "Closed":
+								col = "#30914c";
+								break;
+							case "Renewed":
+								col = "#0064d9";
+								break;
+							default:
+						}
+
+						if (col) {
+							data.cell.styles.textColor = tcol;
+							data.cell.styles.fillColor = col;
+							data.cell.styles.fontStyle = "bold";
+						}
+
+					}
+
+				},
+				didDrawCell: function(data) {
+					/*col ? setTextBG((data.cell.x + 5), (data.cell
+											.y + 12), data.cell.raw, col, tcol) : null;*/
+				}
+			};
+
+			function setTextBG(x, y, txt, bg, col) {
+				var dx = (doc.getStringUnitWidth(txt) * doc.getFontSize()) + 1.5;
+				var yr = y + 0.1 * doc.getFontSize();
+				var dy = -doc.getFontSize();
+				doc.setFillColor(bg);
+				doc.rect(x + dx, yr, -dx - 3, dy - 1, "F");
+				doc.setTextColor(col);
+				doc.text(txt, (x + dx) - 2.5, y - 1.5, {
+					align: 'right'
+				});
+			}
+		},
+
+		getImageData: function(url, def) {
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+				if (this.readyState === this.DONE) {
+					if (this.status === 200) {
+						def.resolve(new Uint8Array(this.response));
+					}
+				}
+			};
+			xhr.open('GET', url, true);
+			xhr.responseType = 'arraybuffer';
+			xhr.send();
+		},
+
+		getTabData: function() {
+
+			var data = this.cModel.getData();
+			var obj;
+			var rObj = {
+				title: data.refNo + "-" + data.name,
+				cust: {
+					head: [{
+						title: "Customer Details",
+						dataKey: ""
+					}],
+					col: [],
+					row: []
+				},
+				acc: {
+					head: [{
+						title: "Account Details",
+						dataKey: ""
+					}],
+					col: [],
+					row: []
+				},
+				stmt: {
+					head: [{
+						title: "Transaction Details",
+						dataKey: ""
+					}],
+					col: [],
+					row: []
+				},
+				sum: {
+					head: [{
+						title: "Summary",
+						dataKey: ""
+					}],
+					tab: []
+				},
+				gold: {
+					head: [{
+						title: "Gold Details",
+						dataKey: ""
+					}],
+					col: [],
+					row: []
+				}
+			}
+
+			//Cust
+			obj = {};
+			obj.title = "Name";
+			obj.dataKey = "nm";
+			rObj.cust.col.push(obj);
+			obj = {};
+			obj.title = "ID";
+			obj.dataKey = "id";
+			rObj.cust.col.push(obj);
+			obj = {};
+			obj.title = "Address";
+			obj.dataKey = "addr";
+			rObj.cust.col.push(obj);
+			obj = {};
+			obj.title = "Mobile";
+			obj.dataKey = "mob";
+			rObj.cust.col.push(obj);
+
+			obj = {};
+			obj.nm = data.name;
+			obj.id = data.id;
+			obj.addr = data.addr;
+			obj.mob = data.mob;
+			rObj.cust.row.push(obj);
+
+			//Acc
+
+			obj = {};
+			obj.title = "Account No.";
+			obj.dataKey = "acc";
+			rObj.acc.col.push(obj);
+			obj = {};
+			obj.title = "Loan Amount (INR)";
+			obj.dataKey = "lnAmt";
+			rObj.acc.col.push(obj);
+			obj = {};
+			obj.title = "Interest %";
+			obj.dataKey = "int";
+			rObj.acc.col.push(obj);
+			obj = {};
+			obj.title = "Gold";
+			obj.dataKey = "gold";
+			rObj.acc.col.push(obj);
+			obj = {};
+			obj.title = "Status";
+			obj.dataKey = "status";
+			rObj.acc.col.push(obj);
+
+			obj = {};
+			obj.acc = data.refNo;
+			obj.lnAmt = this.formatter.numberFormat(data.lnAmt);
+			obj.int = String(data.intTD.roi || data.roi);
+			obj.gold = data.goldGms + " gms";
+			obj.status = data.lnCls ? "Closed" : data.lnRen ? "Renewed" : "Active";
+			rObj.acc.row.push(obj);
+
+			//Trans
+
+			obj = {};
+			obj.title = "Date";
+			obj.dataKey = "dat";
+			rObj.stmt.col.push(obj);
+			obj = {};
+			obj.title = "Remarks";
+			obj.dataKey = "rm";
+			rObj.stmt.col.push(obj);
+			obj = {};
+			obj.title = "Credit (INR)";
+			obj.dataKey = "ct";
+			rObj.stmt.col.push(obj);
+			obj = {};
+			obj.title = "Debit (INR)";
+			obj.dataKey = "dt";
+			rObj.stmt.col.push(obj);
+
+			obj = {};
+			obj.dat = this.formatter.dateFormat(new Date(data.lnDt));
+
+			obj.rm = "Loan Disbursement";
+			obj.ct = "";
+			obj.dt = this.formatter.numberFormat(data.lnAmt);
+			rObj.stmt.row.push(obj);
+
+			data.payDet.forEach(function(e) {
+
+				if (e.lnClsr) {
+					obj = {};
+					obj.dat = this.formatter.dateFormat(new Date(e.payDate));
+
+					obj.rm = "Loan Closure";
+					obj.ct = this.formatter.numberFormat(e.amt);
+					obj.dt = "";
+					rObj.stmt.row.push(obj);
+				} else if (e.lnRen) {
+					obj = {};
+					obj.dat = this.formatter.dateFormat(new Date(e.payDate));
+
+					obj.rm = "Loan Renewal";
+					obj.ct = this.formatter.numberFormat(e.amt);
+					obj.dt = "";
+					rObj.stmt.row.push(obj);
+				} else {
+					if (e.amt > 0) {
+						obj = {};
+						obj.dat = this.formatter.dateFormat(new Date(e.payDate));
+
+						obj.rm = "Payment Received";
+						obj.ct = this.formatter.numberFormat(e.amt);
+						obj.dt = "";
+						rObj.stmt.row.push(obj);
+					} else if (e.amt < 0) {
+						obj = {};
+						obj.dat = this.formatter.dateFormat(new Date(e.payDate));
+
+						obj.rm = "Payment Reversal";
+						obj.ct = "";
+						obj.dt = this.formatter.numberFormat(Math.abs(e.amt));
+						rObj.stmt.row.push(obj);
+					}
+					if (e.apAmt > 0) {
+						obj = {};
+						obj.dat = this.formatter.dateFormat(new Date(e.payDate));
+
+						obj.rm = "Advance Payment Received";
+						obj.ct = this.formatter.numberFormat(e.apAmt);
+						obj.dt = "";
+						rObj.stmt.row.push(obj);
+					} else if (e.apAmt < 0) {
+						obj = {};
+						obj.dat = this.formatter.dateFormat(new Date(e.payDate));
+
+						obj.rm = "Advance Payment Reversal";
+						obj.ct = "";
+						obj.dt = this.formatter.numberFormat(Math.abs(e.apAmt));
+						rObj.stmt.row.push(obj);
+					}
+				}
+			}, this);
+
+			(data.topUp || []).forEach(function(e) {
+				obj = {};
+				obj.dat = e.date;
+				obj.rm = "Loan Top up";
+				obj.ct = "";
+				obj.dt = this.formatter.numberFormat(e.amount);
+				rObj.stmt.row.push(obj);
+			}, this);
+
+			rObj.stmt.row.sort((a, b) => {
+				return new Date(a.dat) - new Date(b.dat);
+			});
+
+			//Summary
+
+			var totAmt = 0;
+			data.payDet.forEach(function(e) {
+				totAmt += Number(e.amt);
+			});
+
+			obj = {
+				col: [],
+				row: []
+			};
+
+			obj.col.push({
+				title: "Loan Topup",
+				dataKey: "l"
+			});
+			obj.col.push({
+				title: ":",
+				dataKey: "s"
+			});
+			obj.col.push({
+				title: this.formatter.numberFormat(data.tpAmt) + " INR",
+				dataKey: "d"
+			});
+
+			obj.row.push({
+				l: "Advance Payment",
+				s: ":",
+				d: this.formatter.numberFormat(data.advAmt_1) + " INR"
+			});
+
+			if (!data.lnCls) {
+				obj.row.push({
+					l: "Total Balance",
+					s: ":",
+					d: this.formatter.numberFormat((data.lnAmt + data.tpAmt - data.advAmt_1)) + " INR"
+				});
+			} else {
+
+				//	totAmt += Number(data.advAmt || 0);
+
+				obj.row.push({
+					l: "Total Amount Paid",
+					s: ":",
+					d: this.formatter.numberFormat(totAmt + Number(data.advAmt || 0)) + " INR"
+				});
+			}
+
+			rObj.sum.tab.push(obj);
+
+			if (!data.lnCls && !data.lnRen) {
+				obj = {
+					col: [],
+					row: []
+				};
+
+				obj.col.push({
+					title: "Interest Paid",
+					dataKey: "l"
+				});
+				obj.col.push({
+					title: ":",
+					dataKey: "s"
+				});
+				obj.col.push({
+					title: this.formatter.numberFormat(totAmt) + " INR",
+					dataKey: "d"
+				});
+				var od = "0";
+				try {
+					od = (this.byId("idAmtDue").getText().split("Overdue: ₹")[1] || 0);
+				} catch (err) {}
+				obj.row.push({
+					l: "Interest Overdue",
+					s: ":",
+					d: od + " INR"
+				});
+
+				rObj.sum.tab.push(obj);
+			} else {
+
+				obj = {
+					col: [],
+					row: []
+				};
+
+				obj.col.push({
+					title: "Profit",
+					dataKey: "l"
+				});
+				obj.col.push({
+					title: ":",
+					dataKey: "s"
+				});
+				var pf = "0",
+					wf = "0";
+				try {
+					pf = this.byId("idIntEarn").getText().split("Profit: ₹")[1];
+					wf = this.byId("idDefAmt").getText().split("Waived off: ₹")[1];
+				} catch (err) {}
+				obj.col.push({
+					title: pf + " INR",
+					dataKey: "d"
+				});
+
+				obj.row.push({
+					l: "Profit %",
+					s: ":",
+					d: sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).parse(pf) * 100 / (Number(data.lnAmt) +
+						Number(data.tpAmt || 0)) + " %"
+				});
+
+				obj.row.push({
+					l: "Waived off",
+					s: ":",
+					d: wf + " INR"
+				});
+
+				rObj.sum.tab.push(obj);
+
+			}
+
+			//Gold
+
+			obj = {};
+			obj.title = "Item";
+			obj.dataKey = "item";
+			rObj.gold.col.push(obj);
+			obj = {};
+			obj.title = "Quantity";
+			obj.dataKey = "qty";
+			rObj.gold.col.push(obj);
+
+			data.gDet.forEach(function(e) {
+				obj = {};
+				obj.item = e.name;
+				obj.qty = e.value;
+				rObj.gold.row.push(obj);
+			});
+
+			return rObj;
 		},
 
 		onTestRun: function(evt) {
