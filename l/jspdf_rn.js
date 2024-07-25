@@ -1,0 +1,5 @@
+(function() {
+	jspdf = {
+		jsPDF: jsPDF
+	};
+})();
