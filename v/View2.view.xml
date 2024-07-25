@@ -57,18 +57,16 @@
 						<Table id="idInstTab" inset="false" items="{cModel>/instDet/}" sticky="ColumnHeaders" class="sapUiTinyMarginTop" growing="true"
 							growingThreshold="25" growingScrollToLoad="true">
 							<headerToolbar>
-								<OverflowToolbar height="2.5rem" design="Info">
+								<OverflowToolbar height="2.5rem" design="Info"  visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}">
 									<content>
 										
 										<HBox visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}">
 											<Button id="idNotBtn" type="Ghost" icon="sap-icon://marketing-campaign" text="Notice" press="onUpdateNot" visible="false"/>
 										</HBox>
 										<ToolbarSpacer/>
-										<HBox visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}">
-											<Button type="Ghost" icon="sap-icon://add-coursebook" text="Top-up" press="onAmtTopUp" visible="{=${uModel>/adm} || ${config>/intRt_c}}" class="sapUiTinyMarginEnd"/>
-											<Button type="Ghost" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt_c}}" class="sapUiTinyMarginEnd"/>
+											<Button type="Ghost" icon="sap-icon://add-coursebook" text="Top-up" press="onAmtTopUp" visible="{=${uModel>/adm} || ${config>/intRt_c}}"/>
+											<Button type="Ghost" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt_c}}" />
 											<Button type="Ghost" icon="sap-icon://paid-leave" text="Add" press="onAddInst" class="sapUiTinyMarginEnd"/>
-										</HBox>
 									</content>
 								</OverflowToolbar>
 							</headerToolbar>
