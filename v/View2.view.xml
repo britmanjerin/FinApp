@@ -12,7 +12,10 @@
 						<ToolbarSpacer/>
 						<Title text="Ref No: {cModel>/refNo}" titleStyle="H4"/>
 						<ToolbarSpacer/>
-						<core:Icon src="sap-icon://user-edit" press="onEditCust" class="sapUiSmallMarginEnd" visible="{=${uModel>/adm}}"/>
+						
+						<core:Icon  src="sap-icon://download" press="exportPDF"  visible="{=${uModel>/adm}}"/>
+					
+						<core:Icon src="sap-icon://user-edit" press="onEditCust" class="sapUiSmallMarginEnd sapUiMediumMarginBegin" visible="{=${uModel>/adm}}"/>
 					</Toolbar>
 				</customHeader>
 				<content>
@@ -22,7 +25,7 @@
 							number="₹{ parts: [{ path: 'cModel>/lnAmt' }, { path: 'cModel>/tpAmt' },{ path: 'cModel>/advAmt_1' }], formatter: 'FabFinV3.c.View2.prototype.formatter.numberFormat_lnAmt' }"
 							numberUnit="">
 							<statuses>
-							<!--	<ObjectStatus text="₹{path: 'cModel>/tpAmt', formatter:'.formatter.numberFormat'}" class="bold" visible="{=(${cModel>/tpAmt} > 0) ? true : false}"/>
+								<!--	<ObjectStatus text="₹{path: 'cModel>/tpAmt', formatter:'.formatter.numberFormat'}" class="bold" visible="{=(${cModel>/tpAmt} > 0) ? true : false}"/>
 								<ObjectStatus text="₹{path: 'cModel>/advAmt_1', formatter:'.formatter.numberFormat'}" class="bold" visible="{=(${cModel>/advAmt_1}> 0) ? true : false}"/>-->
 								<ObjectStatus text="{cModel>/goldGms} gms" active="true" press="showGoldDetails"/>
 								<ObjectStatus inverted="true" id="idObjStatus"
@@ -54,13 +57,18 @@
 						<Table id="idInstTab" inset="false" items="{cModel>/instDet/}" sticky="ColumnHeaders" class="sapUiTinyMarginTop" growing="true"
 							growingThreshold="25" growingScrollToLoad="true">
 							<headerToolbar>
-								<OverflowToolbar height="2.5rem" visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}" design="Info">
+								<OverflowToolbar height="2.5rem" design="Info">
 									<content>
-										<Button id="idNotBtn" type="Ghost" icon="sap-icon://marketing-campaign" text="Notice" press="onUpdateNot" visible="false"/>
+										
+										<HBox visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}">
+											<Button id="idNotBtn" type="Ghost" icon="sap-icon://marketing-campaign" text="Notice" press="onUpdateNot" visible="false"/>
+										</HBox>
 										<ToolbarSpacer/>
-										<Button type="Ghost" icon="sap-icon://add-coursebook" text="Top-up" press="onAmtTopUp" visible="{=${uModel>/adm} || ${config>/intRt_c}}"/>
-										<Button type="Ghost" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt_c}}"/>
-										<Button type="Ghost" icon="sap-icon://paid-leave" text="Add" press="onAddInst"/>
+										<HBox visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}">
+											<Button type="Ghost" icon="sap-icon://add-coursebook" text="Top-up" press="onAmtTopUp" visible="{=${uModel>/adm} || ${config>/intRt_c}}" class="sapUiTinyMarginEnd"/>
+											<Button type="Ghost" icon="sap-icon://waiver" text="Interest" press="onUpdateInt" visible="{=${uModel>/adm} || ${config>/intRt_c}}" class="sapUiTinyMarginEnd"/>
+											<Button type="Ghost" icon="sap-icon://paid-leave" text="Add" press="onAddInst" class="sapUiTinyMarginEnd"/>
+										</HBox>
 									</content>
 								</OverflowToolbar>
 							</headerToolbar>
@@ -98,11 +106,8 @@
 											class="bold"/>
 										<!--	<Text text="{cModel>prA}"/>-->
 										<Text text="₹{=${cModel>/lnCls}=== 'X' ? ${cModel>int} : ${cModel>int}-${cModel>cfInt}}"/>
-										
 										<Text text="₹{parts:[{ path: 'cModel>tpAmt'}] , formatter: 'FabFinV3.c.View2.prototype.formatter.formatAmtVis' }"/>
-										
 										<Text text="₹{parts:[{ path: 'cModel>apAmt'}] , formatter: 'FabFinV3.c.View2.prototype.formatter.formatAmtVis' }"/>
-										
 										<ObjectHeader class="classObjHdrTab" number="&#8377;{=(${cModel>int}) - ${cModel>amtPaid} > 0 ? (${cModel>int} - ${cModel>amtPaid}) : 0}"
 											numberUnit="">
 											<!--{path: 'cModel>/lnAmt', formatter:'.formatter.numberFormat'}      (${cModel>int}) - ${cModel>amtPaid})-->
