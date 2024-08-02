@@ -130,6 +130,17 @@ sap.ui.define([
 
 			$.when(i, j).done(function() {
 				sap.ui.core.BusyIndicator.hide();
+				cData.forEach(function(e) {
+					if (e.clsDt) {
+						for (var i in e.payDet) {
+							if (e.payDet[i].lnClsr || e.payDet[i].lnRen) {
+								e.clsDt = new Date(e.payDet[i].payDate).getTime();
+								break;
+							}
+						}
+					}
+				});
+
 				that.cData = cData;
 				that.dbData(cData, eData);
 				var a = [];
@@ -281,7 +292,7 @@ sap.ui.define([
 					},
 					title: {
 						text: "Monthly"
-					//	visible: false
+							//	visible: false
 					},
 					tooltip: {
 						formatString: "INR_Long",
@@ -360,10 +371,10 @@ sap.ui.define([
 						dataShape: {
 							primaryAxis: ["bar", "line"]
 						},
-						secondaryScale:{
-							fixedRange:true,
-							maxValue:50,
-							minValue:0
+						secondaryScale: {
+							fixedRange: true,
+							maxValue: 50,
+							minValue: 0
 						},
 						drawingEffect: "glossy",
 						primaryValuesColorPalette: ["#6bbd6b"],
@@ -371,7 +382,7 @@ sap.ui.define([
 					},
 					title: {
 						text: "Yearly"
-					//	visible: false
+							//	visible: false
 					},
 					tooltip: {
 						formatString: "INR_Long",
