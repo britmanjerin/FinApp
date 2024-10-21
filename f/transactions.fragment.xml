@@ -21,10 +21,9 @@
 						<!--	<secondStatus>
 							<ObjectStatus text="Prev. bal: {path: 'trans>prv', formatter:'.formatter.numberFormat_1'}" state="None" class="italic"/>
 						</secondStatus>-->
-						<secondStatus>
-							<ObjectStatus icon="sap-icon://delete" active="true" press="onDelAssetTrans" visible="{=(${uModel>/adm})?true:false}"/>
-						</secondStatus>
+				
 						<ObjectAttribute text="{path: 'trans>dt', formatter:'.formatter.dateFormat_1'}"/>
+						<ObjectAttribute text="Delete" active="true" press="onDelAssetTrans" visible="{=(${uModel>/adm})?true:false}"/>
 					</ObjectListItem>
 				</List>
 			</VBox>
