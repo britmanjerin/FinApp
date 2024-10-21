@@ -128,7 +128,7 @@ sap.ui.define([
 
 				e.hist = arr;
 				e.bal = stot;
-				e.txt = e.ps ? "Primary" : e.ext ? "External" : "" ;
+				e.txt = e.ps ? "Primary" : e.ext ? "External" : "";
 			});
 
 			this.byId("idTot").setText(that.formatter.numberFormat_1(tot));
@@ -280,7 +280,7 @@ sap.ui.define([
 			this._tDialog = sap.ui.xmlfragment("FabFinV3.f.transactions", this);
 			this.getView().addDependent(this._tDialog);
 			sap.ui.getCore().byId("idTransTit").setText(dat.src + " Transactions");
-			this._tDialog.setModel(new JSONModel($.extend(true, [], dat)), "trans");
+			this._tDialog.setModel(new JSONModel($.extend(true, {}, dat)), "trans");
 			this._tDialog.open();
 		},
 
@@ -489,6 +489,50 @@ sap.ui.define([
 			}
 		},
 
+		onDelAssetTrans: function(evt) {
+			var mkey = evt.getSource().getParent().getBindingContext("trans").getModel().getData().key;
+			var skey = evt.getSource().getParent().getBindingContext("trans").getObject().dt;
+			sap.m.MessageBox.confirm(
+				"Are you sure want to delete?", {
+					actions: ["Cancel", "Confirm"],
+					onClose: function(sAction) {
+						if (sAction === "Confirm") {
+							delSrc();
+						}
+					}
+				}
+			);
+			var that = this;
+
+			function delSrc() {
+				var eData = that.data;
+
+				for (var j in eData) {
+					if (eData[j].key === mkey) {
+						for (var k in eData[j].hist) {
+							if (eData[j].hist[k].dt === skey) {
+								eData[j].hist.splice(k, 1);
+								break;
+							}
+						}
+						break;
+					}
+				}
+				var body = {
+					message: "Updating file",
+					content: btoa(JSON.stringify(eData)),
+					sha: window.assetsha
+				};
+				var def = $.Deferred();
+				that.updateFile(body, def);
+				$.when(def).done(function() {
+					MessageBox.success("Deleted Successfully.");
+					that.onClose();
+				});
+
+			}
+		},
+
 		updateFile: function(body, def) {
 			var that = this;
 			sap.ui.core.BusyIndicator.show(0);
@@ -511,7 +555,7 @@ sap.ui.define([
 				}
 			});
 		},
-		
+
 		onBkpFile: function() {
 			var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data));
 			this.formatter.downloadFile(dataStr, "Trans_Backup", );
