@@ -769,7 +769,7 @@ sap.ui.define([], function() {
 						intLnAmt = intLnAmt - Number(cModel.trPra || cModel.lnAmt);
 					}
 
-					pObj.int = Number(pObj.amtPaid) - Number(intLnAmt);
+					pObj.int = (Number(pObj.amtPaid)+Number(pObj.apAmt)) - (Number(intLnAmt) + Number(pObj.tpAmt));
 					pObj.int = pObj.int > 0 ? pObj.int : 0;
 					pObj.bPrA = 0;
 					pObj.cfInt = 0;
