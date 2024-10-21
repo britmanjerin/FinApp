@@ -139,6 +139,11 @@ sap.ui.define([
 							}
 						}
 					}
+					if (e.topUp) {
+						e.topUp.forEach(function(el) {
+							e.lnAmt = Number(e.lnAmt) + Number(el.amount);
+						});
+					}
 				});
 
 				that.cData = cData;
@@ -650,13 +655,11 @@ sap.ui.define([
 							ky = el.lnCls ? "cls" : "ren", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], 1, el, e, oy[io], ytd, ky);
 							ky = el.lnCls ? "clam" : "ram", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], el.lnAmt);
 							ky = el.goldAuctn ? "ga" : "", ky ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], 1, el, e, oy[io], ytd,
-									ky) :
-								null;
+								ky) : null;
 							ky = "amtd", Number(el.defAmt) > 0 ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], el.defAmt, el, e, oy[
 								io], null, ky) : null;
 							ky = "adAmtf", Number(el.advAmt) > 0 ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], (el.advAmt || 0), el,
-								e, oy[
-									io], null, ky) : null;
+								e, oy[io], null, ky) : null;
 						}
 						el.payDet.forEach(function(ele) {
 							if (new Date(ele.payDate) >= e.id && new Date(ele.payDate) <= e.ed) {
@@ -668,6 +671,14 @@ sap.ui.define([
 								//new
 							}
 						});
+
+						if (el.topUp) {
+							el.topUp.forEach(function(elem) {
+								if (new Date(elem.date) >= e.id && new Date(elem.date) <= e.ed) {
+									ky = "tpamt", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], elem.amount);
+								}
+							});
+						}
 					});
 					if (new Date(new Date().toDateString()) >= e.id && new Date(new Date().toDateString()) <= e.ed) {
 						ky = "m";
@@ -712,7 +723,8 @@ sap.ui.define([
 			}
 
 			function af(x) {
-				return [x.exp, x.acc, x.lamt, x.amtp, x.nwa, x.ga, x.cls, x.ren, x.clam, x.ram, x.amtd, x.adAmt, x.adAmtf] = Array(15).fill(0);
+				return [x.exp, x.acc, x.lamt, x.amtp, x.nwa, x.ga, x.cls, x.ren, x.clam, x.ram, x.amtd, x.adAmt, x.adAmtf, x.tpamt] = Array(15).fill(
+					0);
 			}
 
 			function fv(a, m, so, mo, yo, ytd, k) {
