@@ -905,14 +905,14 @@ sap.ui.define([
 					var that = this;
 					var idOn = sap.ui.getCore().byId("idOn").getSelected();
 					$.sap.delayedCall(100, this, function() {
-						that.loadBalDet(payAmt, cData, idOn);
+						that.loadBalDet(payAmt, cData, idOn, false, true);
 					});
 				}
 				this.onCl();
 			}
 		},
 
-		loadBalDet: function(payAmt, cData, isOn) {
+		loadBalDet: function(payAmt, cData, isOn, isDbt, reUpd) {
 
 			var that = this;
 			$.ajax({
@@ -925,19 +925,29 @@ sap.ui.define([
 					var data = atob(odata.content);
 					data = data.trim() ? JSON.parse(data) : [];
 					if (data.length != 0) {
-						that.updateBal(odata.sha, payAmt, data, cData, isOn);
+						that.updateBal(odata.sha, payAmt, data, cData, isOn, isDbt, reUpd);
 					}
 				},
 				error: function(oError) {}
 			});
 		},
 
-		updateBal: function(sha, amt, assetData, lnData, isOn) {
-			var obj = {
-				desc: "Credited from " + lnData.name + " (Ref No." + lnData.refNo + ")",
-				amt: amt,
-				dt: Date.now().toString()
-			};
+		updateBal: function(sha, amt, assetData, lnData, isOn, isDbt, reUpd) {
+			var that = this;
+			if (isDbt) {
+				var obj = {
+					desc: "Debited (Top Up) to " + lnData.name + " (Ref No." + lnData.refNo + ")",
+					amt: "-" + amt,
+					dt: Date.now().toString()
+				};
+			} else {
+				var obj = {
+					desc: "Credited from " + lnData.name + " (Ref No." + lnData.refNo + ")",
+					amt: amt,
+					dt: Date.now().toString()
+				};
+			}
+
 			var ps, ext;
 			for (var i in assetData) {
 				if (assetData[i].ps) {
@@ -957,6 +967,7 @@ sap.ui.define([
 				content: btoa(JSON.stringify(assetData)),
 				sha: sha
 			};
+
 			$.ajax({
 				type: 'PUT',
 				url: url,
@@ -964,12 +975,20 @@ sap.ui.define([
 				data: JSON.stringify(body),
 				dataType: 'text',
 				success: function(odata) {
+					sap.ui.core.BusyIndicator.hide();
 					window.assetsha = null;
 				},
 				error: function(odata) {
+					sap.ui.core.BusyIndicator.hide();
+					if (reUpd) {
+						$.sap.delayedCall(100, this, function() {
+							sap.ui.core.BusyIndicator.show(0);
+							that.loadBalDet(amt, lnData, isOn, isDbt, false);
+						});
 
-					MessageBox.error("Failed to update.")
-
+					} else {
+						MessageBox.error("Failed to update.");
+					}
 				}
 			});
 		},
@@ -1067,7 +1086,6 @@ sap.ui.define([
 		},
 
 		cUpdateTopUp: function() {
-
 			var cData = this.cModel.getData();
 			cData.topUp = this._tpDialog.getModel("tpDialogModel").getData();
 			cData.modDt = Date.now().toString();
@@ -1090,6 +1108,15 @@ sap.ui.define([
 			this._tpDialog.getModel("tpDialogModel").getData().splice(oEvent.getSource().getBindingContext("tpDialogModel").getPath().split("/")[
 				1], 1);
 			this._tpDialog.getModel("tpDialogModel").refresh();
+		},
+
+		onUpdTopUptoAst: function() {
+			var amount = sap.ui.getCore().byId("idTPAm").getValue();
+			var date = sap.ui.getCore().byId("idTPDt").getValue();
+			if (date && amount > 0) {
+				sap.ui.core.BusyIndicator.show(0);
+				this.loadBalDet(amount, this.cModel.getData(), false, true, false);
+			}
 		},
 
 		onUpdateInt: function() {
@@ -1816,7 +1843,7 @@ sap.ui.define([
 				options.styles = {
 					fillColor: "#fff9ff",
 					fontStyle: 'bold',
-					cellPadding : 2
+					cellPadding: 2
 				}
 				var stY = 0;
 				tab.sum.tab.forEach(function(e, i) {
@@ -1830,7 +1857,7 @@ sap.ui.define([
 				options.margin.left = 15;
 				options.tableWidth = "auto";
 				options.headStyles = defOpt.headStyles;
-				options.styles =  defOpt.styles;
+				options.styles = defOpt.styles;
 				options.alternateRowStyles = defOpt.alternateRowStyles;
 				options.startY = stY;
 				doc.autoTable(tab.gold.head, [], options);
