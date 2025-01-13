@@ -14,7 +14,7 @@ sap.ui.define([], function() {
 
 		numberFormat_lnAmt: function(lnAmt, tpAmt, apAmt) {
 			var val = Number(lnAmt) + Number(tpAmt);
-		//	val = val - Number(apAmt);
+			//	val = val - Number(apAmt);
 			return sap.ui.core.format.NumberFormat.getFloatInstance(new sap.ui.core.Locale("en-in")).format(val);
 		},
 
@@ -33,6 +33,17 @@ sap.ui.define([], function() {
 		dateFormat_1: function(date) {
 			if (date) {
 				date = new Date(Number(date)).toDateString().split(" ");
+				return date[1] + " " + date[2] + "," + date[3];
+			}
+		},
+
+		setClsdDt: function(data) {
+			if (data && data[0]) {
+				data = $.extend(true, [], data);
+				data.sort((a, b) => {
+					return new Date(b.payDate) - new Date(a.payDate);
+				});
+				var date = new Date(data[0].payDate).toDateString().split(" ");
 				return date[1] + " " + date[2] + "," + date[3];
 			}
 		},
@@ -769,7 +780,7 @@ sap.ui.define([], function() {
 						intLnAmt = intLnAmt - Number(cModel.trPra || cModel.lnAmt);
 					}
 
-					pObj.int = (Number(pObj.amtPaid)+Number(pObj.apAmt)) - (Number(intLnAmt) + Number(pObj.tpAmt));
+					pObj.int = (Number(pObj.amtPaid) + Number(pObj.apAmt)) - (Number(intLnAmt) + Number(pObj.tpAmt));
 					pObj.int = pObj.int > 0 ? pObj.int : 0;
 					pObj.bPrA = 0;
 					pObj.cfInt = 0;
