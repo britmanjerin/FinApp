@@ -37,7 +37,7 @@
 								<ObjectAttribute text="Ref No.: {oModel>refNo}"/>
 								<ObjectAttribute text="Loan Date: {oModel>lnDt}"/>
 								<ObjectAttribute text=""/>
-								<ObjectAttribute text="Closed on: {path:'oModel>clsDt',formatter:'.formatter.dateFormat_1'}"
+								<ObjectAttribute text="Closed on: {path:'oModel>payDet',formatter:'.formatter.setClsdDt'}"
 									visible="{=(${oModel>lnCls}=== 'X'||${oModel>lnRen}=== 'X') ? true : false}"/>
 								<ObjectAttribute
 									text="{ parts: [{ path: 'oModel>lnDt' },{ path: 'oModel>lnDur' }], formatter: 'FabFinV3.c.View1.prototype.formatter.setLnExpTxt' }"
