@@ -203,6 +203,7 @@ sap.ui.define([
 				this.loadCustData(this.custId);
 			}.bind(this), 10);
 		},
+		
 		highlightRow: function() {
 			if (FabFinV3.currRow) {
 
@@ -936,13 +937,13 @@ sap.ui.define([
 			var that = this;
 			if (isDbt) {
 				var obj = {
-					desc: "Debited (Top Up) to " + lnData.name + " (Ref No." + lnData.refNo + ")",
+					desc: "Debited (Top Up) to " + lnData.name + " (" + lnData.refNo + ")",
 					amt: "-" + amt,
 					dt: Date.now().toString()
 				};
 			} else {
 				var obj = {
-					desc: "Credited from " + lnData.name + " (Ref No." + lnData.refNo + ")",
+					desc: "Credited from " + lnData.name + " (" + lnData.refNo + ")",
 					amt: amt,
 					dt: Date.now().toString()
 				};
