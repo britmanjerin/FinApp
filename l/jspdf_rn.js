@@ -1,5 +1,7 @@
 (function() {
-	jspdf = {
-		jsPDF: jsPDF
-	};
+	try {
+		jspdf = {
+			jsPDF: jsPDF
+		};
+	} catch (err) {}
 })();
