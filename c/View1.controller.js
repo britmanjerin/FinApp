@@ -688,7 +688,7 @@ sap.ui.define([
 					assetData.forEach(function(el) {
 						if (e.key === el.key && Number(el.val) > 0) {
 							e.hist.push({
-								desc: "Debited to " + lnData.name + " (Ref No." + lnData.refNo + ")",
+								desc: "Debited to " + lnData.name + " (" + lnData.refNo + ")",
 								amt: "-" + el.val,
 								dt: Date.now().toString()
 							})
