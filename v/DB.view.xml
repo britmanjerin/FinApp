@@ -124,9 +124,16 @@
 							</layoutData>
 						</VBox>
 						<VBox visible="{=${dModel>/sumDB}.length>0 ? true : false}" class="classVZVB">
-							<VBox alignItems="Center" class="classVZTitB">
-								<Title text="Summary" class="bold classVZTit"/>
-								<Title text="({dModel>/avgInv/dtRg})" class="bold classVZTit"/>
+							<VBox class="classVZTitB">
+								<Toolbar design="Transparent" style="Clear">
+									<ToolbarSpacer/>
+									<Title text="Summary" class="bold classVZTit"/>
+									<ToolbarSpacer/>
+								
+								</Toolbar>
+								<HBox justifyContent="Center">
+									<Title text="({dModel>/avgInv/dtRg})" class="bold classVZTit"/>
+								</HBox>
 							</VBox>
 							<!--	<viz:VizFrame id="idSumVF2"  width="100%" vizType='dual_vertical_combination' >
 								<viz:dataset>
@@ -182,7 +189,8 @@
 									<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Name"/>
 								</viz:feeds>
 							</viz:VizFrame>
-							<viz:VizFrame id="idSumVF" height='90rem' width="100%" vizType='dual_horizontal_combination' uiConfig="{applicationSet:'fiori'}">
+							<viz:VizFrame id="idSumVF" height='90rem' width="100%" vizType='dual_horizontal_combination' uiConfig="{applicationSet:'fiori'}"
+								selectData=".onSelectSumVF($event,'idSumVF')">
 								<viz:dataset>
 									<viz.data:FlattenedDataset data="{dModel>/sumDB}">
 										<viz.data:dimensions>
