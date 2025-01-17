@@ -6,8 +6,10 @@ sap.ui.define([
 	'sap/viz/ui5/format/ChartFormatter',
 	'sap/viz/ui5/api/env/Format',
 	"sap/ui/core/format/DateFormat",
-	"sap/ui/core/HTML"
-], function(BaseController, JSONModel, formatter, MessageBox, ChartFormatter, Format, DateFormat, HTMLControl) {
+	"sap/ui/core/HTML",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator"
+], function(BaseController, JSONModel, formatter, MessageBox, ChartFormatter, Format, DateFormat, HTMLControl, Filter, FilterOperator) {
 	"use strict";
 
 	return BaseController.extend("FabFinV3.c.db", {
@@ -197,9 +199,7 @@ sap.ui.define([
 			});
 			key.m.forEach(function(e) {
 				tObj = {};
-				tObj.dim = DateFormat.getDateInstance({
-					pattern: "MMM yyyy"
-				}).format(e.id);
+				tObj.dim = e.sKey;
 				tObj.rev = ((e.amtp + e.adAmtf) - e.clam);
 				tObj.exp = e.exp;
 				tObj.prft = tObj.rev - tObj.exp;
@@ -647,25 +647,40 @@ sap.ui.define([
 							lac[el.key] = Number(el.lnAmt);
 						}
 						if (new Date(el.lnDt) >= e.id && new Date(el.lnDt) <= e.ed) {
-							ky = "nwa", [oy[io][ky], e[ky]] = fv([oy[io][ky], e[ky]], 1, el, e, oy[io], null, ky);
+							ky = "nwa", [oy[io][ky], e[ky]] = fv([oy[io][ky], e[ky]], 1, {
+								key: el.key,
+								name: el.name,
+								date: el.lnDt,
+								refNo: el.refNo,
+								lnAmt: el.lnAmt
+							}, e, oy[io], null, ky);
 							ky = "lamt", [ytd[ky]] = fv([ytd[ky]], el.lnAmt);
 						}
 						if (el.clsDt && (new Date(new Date(Number(el.clsDt)).toDateString()) >= e.id && new Date(new Date(Number(el.clsDt)).toDateString()) <=
 								e.ed)) {
-							ky = el.lnCls ? "cls" : "ren", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], 1, el, e, oy[io], ytd, ky);
+							ky = el.lnCls ? "cls" : "ren", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], 1, el.key, e, oy[io], ytd,
+								ky);
 							ky = el.lnCls ? "clam" : "ram", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], el.lnAmt);
-							ky = el.goldAuctn ? "ga" : "", ky ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], 1, el, e, oy[io], ytd,
+							ky = el.goldAuctn ? "ga" : "", ky ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], 1, el.key, e, oy[io],
+								ytd,
 								ky) : null;
-							ky = "amtd", Number(el.defAmt) > 0 ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], el.defAmt, el, e, oy[
-								io], null, ky) : null;
-							ky = "adAmtf", Number(el.advAmt) > 0 ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], (el.advAmt || 0), el,
+							ky = "amtd", Number(el.defAmt) > 0 ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], el.defAmt, el.key, e,
+								oy[
+									io], null, ky) : null;
+							ky = "adAmtf", Number(el.advAmt) > 0 ? [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], (el.advAmt || 0), el
+								.key,
 								e, oy[io], null, ky) : null;
 						}
 						el.payDet.forEach(function(ele) {
+							ele.pKey = el.key, ele.refNo = el.refNo, ele.name = el.name;
+							if (ele.lnClsr || ele.lnRen) {
+								ele.adAmtf = Number(el.advAmt || 0), ele.lnAmt = Number(el.lnAmt);
+							}
 							if (new Date(ele.payDate) >= e.id && new Date(ele.payDate) <= e.ed) {
-								ky = "amtp", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], ele.amt);
+								ky = "amtp", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], ele.amt, ele,
+									e, oy[io], ytd, ky);
 								//new
-								if (Number(ele.apAmt || 0) > 0 && !ele.rflg && !el.lnCls) {
+								if (Number(ele.apAmt || 0) > 0 && !ele.rflg && !el.lnCls && !el.lnRen) {
 									ky = "adAmt", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], (ele.apAmt || 0));
 								}
 								//new
@@ -674,8 +689,10 @@ sap.ui.define([
 
 						if (el.topUp) {
 							el.topUp.forEach(function(elem) {
+								elem.pKey = el.key, elem.refNo = el.refNo, elem.name = el.name;
 								if (new Date(elem.date) >= e.id && new Date(elem.date) <= e.ed) {
-									ky = "tpamt", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], elem.amount);
+									ky = "tpamt", [ytd[ky], oy[io][ky], e[ky]] = fv([ytd[ky], oy[io][ky], e[ky]], elem.amount, elem,
+										e, oy[io], ytd, ky);
 								}
 							});
 						}
@@ -714,7 +731,10 @@ sap.ui.define([
 					o = {
 						m: new Date(yr, f).getMonth(),
 						id: new Date(yr, f, 1),
-						ed: new Date(yr, f + 1, 0)
+						ed: new Date(yr, f + 1, 0),
+						sKey: DateFormat.getDateInstance({
+							pattern: "MMM yyyy"
+						}).format(new Date(yr, f))
 					}
 					a.push(o);
 					f = (f + 1) % 12, yr = !f ? yr + 1 : yr;
@@ -839,6 +859,164 @@ sap.ui.define([
 
 		onSelectVF: function(oEvent) {
 			var status = oEvent.getParameter('data')[0].data.Status;
+		},
+
+		onChangeKey: function(evt) {
+			var filterArray = [];
+			filterArray.push(new Filter("key", FilterOperator.EQ, sap.ui.getCore().byId("idSelKey").getSelectedKey()));
+			sap.ui.getCore().byId("idList").getBinding("items").filter(filterArray);
+		},
+
+		onSelectSumVF: function(oEvent) {
+			oEvent.getSource().vizSelection([], {
+				"clearSelection": true
+			});
+			if (oEvent.getParameter('data').length > 1) {
+
+				var that = this,
+					[mArr, dbt, crt, int] = [
+						[], 0, 0, 0
+					],
+					month = oEvent.getParameter('data')[0].data.Month,
+					mObj = that.dbd[that.byId("idSelDB").getSelectedKey()].m.filter(e => e.sKey === month)[0];
+
+				(mObj.amtpa || []).forEach(e => {
+
+					if (e.lnClsr) {
+
+						mArr.push({ //Loan Closure
+							key: "C",
+							desc: "Principal",
+							amt: e.lnAmt,
+							dt: new Date(e.payDate),
+							rem: "Loan Closure - " + e.name + " (" + e.refNo + ")",
+							mKey:e.pKey
+						});
+						mArr.push({ //Credit Interest
+							key: "I",
+							desc: "Interest",
+							amt: (e.amt + e.adAmtf) - e.lnAmt,
+							dt: new Date(e.payDate),
+							rem: "Credited - " + e.name + " (" + e.refNo + ")",
+							mKey:e.pKey
+						});
+					} else {
+						if (e.amt < 0) {
+							mArr.push({ //Debit Interest
+								key: "I",
+								desc: "Interest",
+								amt: e.amt,
+								dt: new Date(e.payDate),
+								rem: "Payment Reversal - " + e.name + " (" + e.refNo + ")",
+								mKey:e.pKey
+							});
+						} else if (e.amt > 0) {
+							mArr.push({ //Credit Interest
+								key: "I",
+								desc: "Interest",
+								amt: e.amt,
+								dt: new Date(e.payDate),
+								rem: "Credited - " + e.name + " (" + e.refNo + ")",
+								mKey:e.pKey
+							});
+						}
+						if (e.apAmt < 0) {
+							mArr.push({ //Debit Adv Pay
+								key: "D",
+								desc: "Principal",
+								amt: e.apAmt,
+								dt: new Date(e.payDate),
+								rem: "Payment Reversal - " + e.name + " (" + e.refNo + ")",
+								mKey:e.pKey
+							});
+						} else if (e.apAmt > 0) {
+							mArr.push({ //Credit Adv Pay
+								key: "C",
+								desc: "Principal",
+								amt: e.apAmt,
+								dt: new Date(e.payDate),
+								rem: "Advance Payment - " + e.name + " (" + e.refNo + ")",
+								mKey:e.pKey
+							});
+						}
+					}
+				});
+				(mObj.nwaa || []).forEach(e => {
+					mArr.push({ //New Acc
+						key: "D",
+						desc: "Principal",
+						amt: -Number(e.lnAmt),
+						dt: new Date(e.date),
+						rem: "New Account - " + e.name + " (" + e.refNo + ")",
+						mKey:e.key
+					});
+				});
+
+				(mObj.tpamta || []).forEach(e => {
+					mArr.push({ //Topup
+						key: "D",
+						desc: "Principal",
+						amt: -Number(e.amount),
+						dt: new Date(e.date),
+						rem: "Topup - " + e.name + " (" + e.refNo + ")",
+						mKey:e.pKey
+					});
+				});
+
+				mArr.sort((a, b) => {
+					return new Date(a.dt) - new Date(b.dt);
+				});
+
+				mArr.forEach(e => {
+					e.tot = increment(e.key, e.amt)
+				});
+
+				mArr.reverse();
+
+				function increment(key, val) {
+					switch (key) {
+						case "I":
+							int += val;
+							val = int;
+							break;
+						case "C":
+							crt += val;
+							val = crt;
+							break;
+						case "D":
+							dbt += val;
+							val = dbt;
+							break;
+						default:
+					}
+					return val;
+				}
+
+				if (that._mrDialog) {
+					that._mrDialog.destroy();
+				}
+				that._mrDialog = sap.ui.xmlfragment("FabFinV3.f.mReport", that);
+				that.getView().addDependent(that._mrDialog);
+				sap.ui.getCore().byId("idRepTit").setText(month);
+				that._mrDialog.setModel(new JSONModel($.extend(true, {}, mArr)), "mRep");
+				that.onChangeKey();
+				$.sap.delayedCall(10, this, function() {
+					that.vizPopOver.close();
+					that._mrDialog.open();
+				});
+			}
+		},
+
+		onClose: function() {
+			if (this._mrDialog) {
+				this._mrDialog.destroy();
+			}
+		},
+
+		onNav: function(obj) {
+			this.getOwnerComponent().getRouter().navTo("customer", {
+				custId: obj.mKey
+			});
 		},
 
 		onNavLP: function(obj) {
