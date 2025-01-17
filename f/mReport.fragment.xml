@@ -1,0 +1,38 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+	<Dialog class="sapUiSizeCompact" contentWidth="100%" initialFocus="done">
+		<customHeader>
+			<Bar>
+				<contentMiddle>
+					<Title id="idRepTit" text="Transactions"/>
+				</contentMiddle>
+				<contentRight>
+						<Select id="idSelKey"  selectedKey="I" change="onChangeKey">
+							<core:Item key="I" text="Interest"/>
+							<core:Item key="D" text="Principal Debit"/>
+							<core:Item key="C" text="Principal Credit"/>
+						</Select>
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<VBox class="sapUiTinyMargin">
+				<List id="idList" items="{mRep>/}" growing="true" growingThreshold="25" growingScrollToLoad="true">
+					<ObjectListItem type="Active" press=".onNav(${mRep>})" title="{mRep>rem}" number="{path: 'mRep>amt', formatter:'.formatter.numberFormat_1'}" numberUnit=""
+						numberState="{=Number(${mRep>amt})>0?'Success':'Error'}" class="classTrList" >
+						<firstStatus>
+							<ObjectStatus text="{path: 'mRep>tot', formatter:'.formatter.numberFormat_1'}" state="Warning" class="italic"/>
+						</firstStatus>
+					
+						<ObjectAttribute text="{path: 'mRep>dt', formatter:'.formatter.dateFormat'}"/>
+						<ObjectAttribute text="{mRep>desc}" active="true"/>
+					</ObjectListItem>
+				</List>
+			</VBox>
+		</content>
+		<buttons>
+			<Button type="Ghost" text="Close" press="onClose" class="sapUiTinyMarginEnd"/>
+		</buttons>
+		<beginButton></beginButton>
+		<endButton></endButton>
+	</Dialog>
+</core:FragmentDefinition>
