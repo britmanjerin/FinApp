@@ -895,7 +895,7 @@ sap.ui.define([
 						mArr.push({ //Credit Interest
 							key: "I",
 							desc: "Interest",
-							amt: (e.amt + e.adAmtf) - e.lnAmt,
+							amt: (Number(e.amt) + Number(e.adAmtf)) - e.lnAmt,
 							dt: new Date(e.payDate),
 							rem: "Credited - " + e.name + " (" + e.refNo + ")",
 							mKey:e.pKey
