@@ -28,8 +28,16 @@ sap.ui.define([
 				}
 			}, this);
 
+			this.byId("idObjHdr").addEventDelegate({
+				onAfterRendering: function() {
+			//		$("#" + this.byId("idObjHdr-titleArrow").getId()).attr('style', "font-size:1.2rem;font-family: SAP-icons;color:#1976d2;");
+					$("#" + this.byId("idObjHdr-titleArrow").getId()).attr('data-sap-ui-icon-content', "");
+				}
+			}, this);
+
 			//this.getMonthRange()
 		},
+
 		_onObjectMatched: function(evt) {
 
 			if (window.testRun) {
@@ -213,6 +221,64 @@ sap.ui.define([
 						var sText = String(sap.ui.getCore().byId('submitDialogLnDur').getValue());
 						if (sText.trim().length > 0) {
 							cData.lnDur = sText;
+							cData.modDt = Date.now().toString();
+							delete cData.instDet;
+							delete cData.advAmt_1;
+							delete cData.tpAmt;
+							delete cData.intTD
+							var oData = that.oModel.getData();
+							for (var j in oData) {
+								if (oData[j].key === cData.key) {
+									oData.splice(j, 1, cData);
+									break;
+								}
+							}
+							dialog.close();
+							that.updateFile(oData);
+						}
+					}
+				}),
+				beginButton: new sap.m.Button({
+					type: sap.m.ButtonType.Ghost,
+					text: 'Cancel',
+					press: function() {
+						dialog.close();
+					}
+				}),
+				afterClose: function() {
+					dialog.destroy();
+				}
+			}).addStyleClass("sapUiSizeCompact");
+
+			dialog.open();
+
+		},
+
+		handleRemarksPress: function() {
+
+			var that = this;
+			var cData = that.cModel.getData();
+			var dialog = new sap.m.Dialog({
+				title: 'Remarks',
+				type: 'Message',
+				contentWidth: sap.ui.Device.system.phone ? '100%' : "auto",
+
+				content: [
+					new sap.m.TextArea('submitDialogRem', {
+						value: cData.rmk || "",
+						rows:7,
+						width: sap.ui.Device.system.phone ? '100%' : "30rem",
+						placeholder: 'Remarks'
+					})
+				],
+				endButton: new sap.m.Button({
+					type: sap.m.ButtonType.Ghost,
+					text: 'Ok',
+					enabled: true,
+					press: function() {
+						var sText = sap.ui.getCore().byId('submitDialogRem').getValue();
+						if (sText.trim().length > 0) {
+							cData.rmk = sText;
 							cData.modDt = Date.now().toString();
 							delete cData.instDet;
 							delete cData.advAmt_1;
