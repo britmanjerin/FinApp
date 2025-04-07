@@ -47,10 +47,10 @@
 							<ObjectAttribute title="ID" text="{cModel>/id}" active="true" press="clickIDNo"/>
 							<ObjectAttribute title="Phone" text="{cModel>/mob}" active="true" press="clickPhone"/>
 							<ObjectAttribute title="Address" text="{cModel>/addr}"/>
-							<ObjectAttribute
+							<ObjectAttribute active="true"
 								text="{ parts: [{ path: 'cModel>/lnDt' },{ path: 'cModel>/lnDur' }], formatter: 'FabFinV3.c.View2.prototype.formatter.setLnExpTxt' }"
-								visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}"/>
-							<ObjectAttribute class="classNotAttr"
+								visible="{=(${cModel>/lnCls}=== 'X'||${cModel>/lnRen}=== 'X') ? false : true}" press="onExtendLnDur"/>
+							<ObjectAttribute class="classNotAttr" 
 								text="{ parts: [{ path: 'cModel>/notice' }, { path: 'cModel>/notDat' }], formatter: '.formatter.setNotStatus' }"
 								visible="{=${cModel>/notice} ? true : false}"/>
 						</ObjectHeader>
