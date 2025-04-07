@@ -21,9 +21,10 @@
 				<content>
 					<PullToRefresh id="pullToRefresh" refresh="handleRefresh"/>
 					<l:Grid defaultSpan="L12 M12 S12" vSpacing="0" hSpacing="0.5">
-						<ObjectHeader icon="{= !${iModel>/dp} ? 'sap-icon://customer' : ${iModel>/dp}}" imageShape="Circle" title="{cModel>/name}"
+					<!--	icon="{= !${iModel>/dp} ? 'sap-icon://customer' : ${iModel>/dp}}" imageShape="Circle"-->
+						<ObjectHeader id="idObjHdr"  title="{cModel>/name}"
 							number="₹{ parts: [{ path: 'cModel>/lnAmt' }, { path: 'cModel>/tpAmt' },{ path: 'cModel>/advAmt_1' }], formatter: 'FabFinV3.c.View2.prototype.formatter.numberFormat_lnAmt' }"
-							numberUnit="">
+							numberUnit="" showTitleSelector="true" titleSelectorPress="handleRemarksPress">
 							<statuses>
 								<!--	<ObjectStatus text="₹{path: 'cModel>/tpAmt', formatter:'.formatter.numberFormat'}" class="bold" visible="{=(${cModel>/tpAmt} > 0) ? true : false}"/>
 								<ObjectStatus text="₹{path: 'cModel>/advAmt_1', formatter:'.formatter.numberFormat'}" class="bold" visible="{=(${cModel>/advAmt_1}> 0) ? true : false}"/>-->
