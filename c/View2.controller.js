@@ -189,6 +189,63 @@ sap.ui.define([
 
 		},
 
+		onExtendLnDur: function() {
+			var that = this;
+			var cData = that.cModel.getData();
+			var dialog = new sap.m.Dialog({
+				title: 'Extend Loan Duration',
+				type: 'Message',
+				contentWidth: sap.ui.Device.system.phone ? '100%' : "auto",
+
+				content: [
+					new sap.m.Input('submitDialogLnDur', {
+						type: "Number",
+						value: cData.lnDur,
+						width: sap.ui.Device.system.phone ? '100%' : "30rem",
+						placeholder: 'Loan duration in months'
+					})
+				],
+				endButton: new sap.m.Button({
+					type: sap.m.ButtonType.Ghost,
+					text: 'Ok',
+					enabled: true,
+					press: function() {
+						var sText = String(sap.ui.getCore().byId('submitDialogLnDur').getValue());
+						if (sText.trim().length > 0) {
+							cData.lnDur = sText;
+							cData.modDt = Date.now().toString();
+							delete cData.instDet;
+							delete cData.advAmt_1;
+							delete cData.tpAmt;
+							delete cData.intTD
+							var oData = that.oModel.getData();
+							for (var j in oData) {
+								if (oData[j].key === cData.key) {
+									oData.splice(j, 1, cData);
+									break;
+								}
+							}
+							dialog.close();
+							that.updateFile(oData);
+						}
+					}
+				}),
+				beginButton: new sap.m.Button({
+					type: sap.m.ButtonType.Ghost,
+					text: 'Cancel',
+					press: function() {
+						dialog.close();
+					}
+				}),
+				afterClose: function() {
+					dialog.destroy();
+				}
+			}).addStyleClass("sapUiSizeCompact");
+
+			dialog.open();
+
+		},
+
 		setUModel: function() {
 			var adm = this.validateCookie("user").substr(0, 1) === "A" ? true : false;
 			this.uModel.setData({
@@ -203,7 +260,7 @@ sap.ui.define([
 				this.loadCustData(this.custId);
 			}.bind(this), 10);
 		},
-		
+
 		highlightRow: function() {
 			if (FabFinV3.currRow) {
 
