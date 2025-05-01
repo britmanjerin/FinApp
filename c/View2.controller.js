@@ -30,7 +30,7 @@ sap.ui.define([
 
 			this.byId("idObjHdr").addEventDelegate({
 				onAfterRendering: function() {
-			//		$("#" + this.byId("idObjHdr-titleArrow").getId()).attr('style', "font-size:1.2rem;font-family: SAP-icons;color:#1976d2;");
+					//		$("#" + this.byId("idObjHdr-titleArrow").getId()).attr('style', "font-size:1.2rem;font-family: SAP-icons;color:#1976d2;");
 					$("#" + this.byId("idObjHdr-titleArrow").getId()).attr('data-sap-ui-icon-content', "");
 				}
 			}, this);
@@ -266,7 +266,7 @@ sap.ui.define([
 				content: [
 					new sap.m.TextArea('submitDialogRem', {
 						value: cData.rmk || "",
-						rows:7,
+						rows: 7,
 						width: sap.ui.Device.system.phone ? '100%' : "30rem",
 						placeholder: 'Remarks'
 					})
@@ -1193,14 +1193,32 @@ sap.ui.define([
 
 		onAddTopUp: function() {
 
+			var cData = this.cModel.getData().instDet;
+
 			var date = sap.ui.getCore().byId("idTPDt").getValue();
 			var amount = sap.ui.getCore().byId("idTPAm").getValue();
+			var defInt = sap.ui.getCore().byId("idDefInt").getSelected() ? "X" : "";
+			var intDate = date;
 
 			if (date && amount > 0) {
+				try {
+					if (defInt) {
+						for (var i in cData) {
+							if (new Date(date) <= new Date(cData[i].intTo) && new Date(date) >= new Date(cData[i].intFrm)) {
+								intDate = cData[Number(i) + 1].intFrm;
+								intDate = intDate.toDateString();
+								break;
+							}
+						}
+					}
+				} catch (err) {}
+
 				var model = this._tpDialog.getModel("tpDialogModel").getData();
 				var nwObj = {
 					date: date,
 					amount: amount,
+					intDate: intDate,
+					defInt:defInt,
 					modDt: Date.now().toString()
 				};
 				model.push(nwObj);
