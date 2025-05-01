@@ -31,7 +31,7 @@
 					<t:Table rows="{tpDialogModel>/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
 						rowActionCount="1" enableCellFilter="true">
 						<t:columns>
-							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
+							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false" >
 								<Text text="Date" class="white bold" textAlign="Begin" wrapping="false"/>
 								<t:template>
 									<Text text="{tpDialogModel>date}"/>
@@ -43,7 +43,7 @@
 									<Text text="₹{tpDialogModel>amount}"/>
 								</t:template>
 							</t:Column>
-							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
+							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false" width="4rem">
 								<Text text="Def. Int" class="white bold" textAlign="Begin" wrapping="false"/>
 								<t:template>
 									<Text text="{=${tpDialogModel>defInt} ? 'Yes' : 'No'}"/>
