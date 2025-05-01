@@ -612,9 +612,9 @@ sap.ui.define([], function() {
 				//new
 
 				tpArr = (cModel.topUp || []).filter((tp) => {
-					return (new Date(tp.date) <= new Date(pObj.intTo) && new Date(tp.date) >= new Date(pObj.intFrm));
+					return (new Date(tp.intDate||tp.date) <= new Date(pObj.intTo) && new Date(tp.intDate||tp.date) >= new Date(pObj.intFrm));
 				});
-
+				
 				tpAddAmt = 0;
 
 				if (tpArr.length > 0) {
@@ -629,7 +629,7 @@ sap.ui.define([], function() {
 					};
 					tpArr.forEach(function(x) {
 						tpAmt += Number(x.amount);
-						tpObj.nd = Math.ceil(Math.abs(new Date(x.date) - new Date(pObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
+						tpObj.nd = Math.ceil(Math.abs(new Date(x.intDate||x.date) - new Date(pObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
 						if (tpObj.nd > 15) {
 							tpObj[1].tpAmt += Number(x.amount);
 						} else {
