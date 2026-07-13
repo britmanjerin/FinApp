@@ -47,7 +47,7 @@ sap.ui.define([
 
 			aKey = aKey.reverse().join("").replace("@#$", "_");
 
-			this.validateUser(userid, aKey, adflg);
+			this.validateUser(userid, aKey, aflg);
 
 		},
 
