@@ -20,34 +20,45 @@ sap.ui.define([
 		},
 
 		onLogin: function() {
-			var userid = this.byId("idInpUsr").getValue().trim().toUpperCase();
-			var aflg = false;
-			try {
-				aflg = userid.substr(0, 1).charCodeAt() === Number(atob("NjU=")) ? true : false;
 			
-			} catch (err) {}
-			var pswd = this.byId("idInpPswd").getValue().trim();
-			var ekey = "",
-				kArr = [
-					[6, 22, -20, 41, 10, -5, 8, -32, 45, 17, -31, -6, 26],
-					[16, 37, 16, 32, 1, -40, -18, -22, -17, 5, 29, 68, 2]
-				];
-
-			(userid + pswd).split("").forEach(function(e, key) {
+				var userid = this.byId("idInpUsr").getValue().trim().toUpperCase();
+				var aflg = false;
 				try {
-					ekey += aflg ? String.fromCharCode(e.charCodeAt() + kArr[0][key]) : String.fromCharCode(e.charCodeAt() + kArr[1][key])
-
+					aflg = userid.substr(0, 1).charCodeAt() === Number(atob("NjU=")) ? true : false;
 				} catch (err) {}
+				var pswd = this.byId("idInpPswd").getValue().trim();
+				var ekey = "",
+					kArr = [
+						[6, 22, -20, 41, 10, -5, 8, -32, 45, 17, -31, -6, 26],
+						[16, 37, 16, 32, 1, -40, -18, -22, -17, 5, 29, 68, 2]
+					];
 
-			});
+				(userid + pswd).split("").forEach(function(e, key) {
+					try {
+						ekey += aflg ? String.fromCharCode(e.charCodeAt() + kArr[0][key]) : String.fromCharCode(e.charCodeAt() + kArr[1][key])
+					} catch (err) {}
+				});
 
-			var aKey = aflg ? ["3SAUVq", "UYg57T", "zqsHb", "2EzJXsg", ekey, "ghp@#$"] : ["bUwG8", "a6enRw4", "GejXcV", "NILpfi", ekey,
-				"ghp@#$"
-			];
+				if (!aflg) {
+					var tkey = "",
+						tArr = [-30, -30, -28, 0, 38, 20, 16, -1, 12, 60, -10, -16];
+					ekey.split("").forEach((e, key) => {
+						tkey += String.fromCharCode(e.charCodeAt() + tArr[key]);
+					});
+					ekey = tkey;
+			}
+
+			/*	var aKey = aflg ? ["3SAUVq", "UYg57T", "zqsHb", "2EzJXsg", ekey, "ghp@#$"] : ["bUwG8", "a6enRw4", "GejXcV", "NILpfi", ekey,
+					"ghp@#$"
+				];*/
+
+				var aKey = aflg ? ["3SAUVq", "UYg57T", "zqsHb", "2EzJXsg", ekey, "ghp@#$"] : ["3SAUVq", "UYg57T", "zqsHb", "2EzJXsg", ekey, "ghp@#$"];
 
 			aKey = aKey.reverse().join("").replace("@#$", "_");
 
 			this.validateUser(userid, aKey, aflg);
+
+		
 
 		},
 
