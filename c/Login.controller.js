@@ -23,7 +23,8 @@ sap.ui.define([
 			var userid = this.byId("idInpUsr").getValue().trim().toUpperCase();
 			var aflg = false;
 			try {
-				aflg = userid.substr(0, 1).charCodeAt() === Number(atob("NjU=")) ? true : false;
+				adflg = userid.substr(0, 1).charCodeAt() === Number(atob("NjU=")) ? true : false;
+				aflg = true;
 			} catch (err) {}
 			var pswd = this.byId("idInpPswd").getValue().trim();
 			var ekey = "",
@@ -46,7 +47,7 @@ sap.ui.define([
 
 			aKey = aKey.reverse().join("").replace("@#$", "_");
 
-			this.validateUser(userid, aKey, aflg);
+			this.validateUser(userid, aKey, adflg);
 
 		},
 
