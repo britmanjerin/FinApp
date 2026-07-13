@@ -23,8 +23,8 @@ sap.ui.define([
 			var userid = this.byId("idInpUsr").getValue().trim().toUpperCase();
 			var aflg = false;
 			try {
-				adflg = userid.substr(0, 1).charCodeAt() === Number(atob("NjU=")) ? true : false;
-				aflg = true;
+				aflg = userid.substr(0, 1).charCodeAt() === Number(atob("NjU=")) ? true : false;
+			
 			} catch (err) {}
 			var pswd = this.byId("idInpPswd").getValue().trim();
 			var ekey = "",
