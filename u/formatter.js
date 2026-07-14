@@ -612,9 +612,9 @@ sap.ui.define([], function() {
 				//new
 
 				tpArr = (cModel.topUp || []).filter((tp) => {
-					return (new Date(tp.intDate||tp.date) <= new Date(pObj.intTo) && new Date(tp.intDate||tp.date) >= new Date(pObj.intFrm));
+					return (new Date(tp.intDate || tp.date) <= new Date(pObj.intTo) && new Date(tp.intDate || tp.date) >= new Date(pObj.intFrm));
 				});
-				
+
 				tpAddAmt = 0;
 
 				if (tpArr.length > 0) {
@@ -629,7 +629,7 @@ sap.ui.define([], function() {
 					};
 					tpArr.forEach(function(x) {
 						tpAmt += Number(x.amount);
-						tpObj.nd = Math.ceil(Math.abs(new Date(x.intDate||x.date) - new Date(pObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
+						tpObj.nd = Math.ceil(Math.abs(new Date(x.intDate || x.date) - new Date(pObj.intFrm)) / (1000 * 60 * 60 * 24)) + 1;
 						if (tpObj.nd > 15) {
 							tpObj[1].tpAmt += Number(x.amount);
 						} else {
@@ -824,21 +824,25 @@ sap.ui.define([], function() {
 			return 0;
 		},
 
-		enableReverse: function(amt, apamt, rflg) {
-			var pDat = this.cModel.getData().payDet;
-			var pfa = false;
-			for (var i in pDat) {
-				if ((Number(pDat[i].amt) > 0 && Number(pDat[i].apAmt) < 0) && !pDat[i].rflg) {
-					pfa = true;
+		enableReverse: function(amt, apamt, rflg, adm, rev) {
+
+			var cData = this.cModel.getData();
+			if ((adm || rev) && !cData.lnCls && !cData.lnRen) {
+				var pDat = this.cModel.getData().payDet;
+				var pfa = false;
+				for (var i in pDat) {
+					if ((Number(pDat[i].amt) > 0 && Number(pDat[i].apAmt) < 0) && !pDat[i].rflg) {
+						pfa = true;
+					}
 				}
-			}
-			if (pfa) {
-				if (apamt > 0) {
-					return false;
+				if (pfa) {
+					if (apamt > 0) {
+						return false;
+					}
 				}
-			}
-			if (!rflg && (amt > 0 || apamt > 0)) {
-				return true;
+				if (!rflg && (amt > 0 || apamt > 0)) {
+					return true;
+				}
 			}
 
 			return false;
