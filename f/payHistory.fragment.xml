@@ -35,8 +35,8 @@
 						<Text text="Payment History" class="bold"/>
 					</Toolbar>
 					<t:Table rows="{cModel>hist/}" enableColumnReordering="false" visibleRowCount="5" selectionMode="None" showNoData="true"
-						enableCellFilter="true" class="sapUiSmallMarginBottom"
-						rowActionCount="{ parts: [{ path: 'uModel>/adm' }, { path: 'config>/reversal' }], formatter: '.formatter.visReverse' }">
+						enableCellFilter="true" class="sapUiSmallMarginBottom" rowActionCount="1">
+						<!--	rowActionCount="{ parts: [{ path: 'uModel>/adm' }, { path: 'config>/reversal' }], formatter: '.formatter.visReverse' }"-->
 						<t:columns>
 							<t:Column sortProperty="" filterProperty="" hAlign="Start" resizable="false">
 								<Text text="Payment Date" class="white bold" textAlign="Begin" wrapping="false" width="100%"/>
@@ -60,7 +60,7 @@
 						<t:rowActionTemplate >
 							<t:RowAction>
 								<t:RowActionItem icon="sap-icon://undo" press=".onRevPay(${cModel>crtDt})"
-									visible="{ parts: [{ path: 'cModel>amt' }, { path: 'cModel>apAmt' },{ path: 'cModel>rflg' }], formatter: '.formatter.enableReverse' }"/>
+									visible="{ parts: [{ path: 'cModel>amt' }, { path: 'cModel>apAmt' },{ path: 'cModel>rflg' },{ path: 'uModel>/adm' }, { path: 'config>/reversal' }], formatter: '.formatter.enableReverse' }"/>
 							</t:RowAction>
 						</t:rowActionTemplate>
 					</t:Table>
