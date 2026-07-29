@@ -65,6 +65,11 @@ sap.ui.define([
 					"Accept": "application/vnd.github.v3+json",
 					"Content-Type": "application/json"
 				};
+				this.headers_cust = {
+					"Authorization": 'Bearer ' + aKey,
+					"Accept": "application/vnd.github.v3.raw",
+					"Content-Type": "application/json"
+				};
 			}
 
 			this.loadCustData();
@@ -215,12 +220,12 @@ sap.ui.define([
 							content.getItems().forEach(function(e) {
 								if (e.getText) {
 									that.filtOpt[e.getText()] = e.getSelected();
-								}else{
+								} else {
 									that.filtOpt.filterVal = e.getValue().trim();
 								}
 							});
 							that.filtOpt.sort = true;
-							
+
 							that.onFOP();
 							p.close();
 						}
@@ -301,39 +306,43 @@ sap.ui.define([
 			this.byId("idList").getBinding("items").filter(filterArray);
 		},
 
-		loadCustData: function() {
+		loadCustData: function(head_cust) {
 			FabFinV3.filterArr = [];
 			var that = this;
 			var i = $.Deferred();
 			var j = $.Deferred();
 			sap.ui.core.BusyIndicator.show(0);
-
 			$.ajax({
 				type: 'GET',
 				url: this.custurl,
-				headers: this.headers,
+				headers: head_cust?head_cust:this.headers,
 				cache: false,
 				success: function(odata) {
 					if (!window.custsha) {
 						window.custsha = odata.sha;
 					} else {
-
-						if (window.custsha != odata.sha) {
-
-							if (that.rCount1 > 2) {
-								window.location.reload();
-							} else {
-								that.rCount1++;
-								$.sap.delayedCall(3000, this, function() {
-									that.loadCustData();
-								});
+						if (odata.sha) {
+							if (window.custsha != odata.sha) {
+								if (that.rCount1 > 2) {
+									window.location.reload();
+								} else {
+									that.rCount1++;
+									$.sap.delayedCall(3000, this, function() {
+										that.loadCustData();
+									});
+								}
+								return;
 							}
-							return;
+							that.rCount1 = 0;
 						}
-						that.rCount1 = 0;
 					}
 
-					var data = atob(odata.content);
+					if (odata.content === "") {
+							that.loadCustData(that.headers_cust);
+							return;
+					}
+
+					var data = odata.content?atob(odata.content):odata;
 					data = data.trim() ? JSON.parse(data) : [];
 					data.forEach(function(e) {
 						var lnObj = that.formatter.setStatus_h(e, that);
