@@ -66,6 +66,12 @@ sap.ui.define([
 					"Accept": "application/vnd.github.v3+json",
 					"Content-Type": "application/json"
 				};
+				
+				this.headers_cust = {
+					"Authorization": 'Bearer ' + aKey,
+					"Accept": "application/vnd.github.v3.raw",
+					"Content-Type": "application/json"
+				};
 			}
 
 			this.uModel = new JSONModel();
@@ -373,7 +379,7 @@ sap.ui.define([
 
 			}
 		},
-		loadCustData: function(custId) {
+		loadCustData: function(custId,head_cust) {
 			var config = {};
 			if (!this.uModel.getData().adm) {
 				if (!sap.ui.getCore().getModel("config")) {
@@ -394,14 +400,15 @@ sap.ui.define([
 			sap.ui.core.BusyIndicator.show(0);
 			$.ajax({
 				type: 'GET',
-				headers: this.headers,
+				headers: head_cust?head_cust:this.headers,
 				url: this.custurl,
 				cache: false,
 				success: function(odata) {
 					if (!window.custsha) {
 						window.custsha = odata.sha;
 					} else {
-						if (window.custsha != odata.sha) {
+						if(odata.sha){
+								if (window.custsha != odata.sha) {
 
 							if (that.rCount > 2) {
 								window.location.reload();
@@ -410,16 +417,21 @@ sap.ui.define([
 								$.sap.delayedCall(3000, this, function() {
 									that.loadCustData(custId);
 								});
-
 							}
-
 							return;
 						}
 
 						that.rCount = 0;
+						}
+					
 					}
-
-					var data = atob(odata.content);
+					
+						if (odata.content === "") {
+							that.loadCustData(custId,that.headers_cust);
+							return;
+					}
+					
+					var data = odata.content?atob(odata.content):odata;
 					data = data.trim() ? JSON.parse(data) : [];
 
 					that.oModel.setData(data);
