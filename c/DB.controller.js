@@ -45,6 +45,11 @@ sap.ui.define([
 					"Accept": "application/vnd.github.v3+json",
 					"Content-Type": "application/json"
 				};
+					this.headers_cust = {
+					"Authorization": 'Bearer ' + aKey,
+					"Accept": "application/vnd.github.v3.raw",
+					"Content-Type": "application/json"
+				};
 			}
 			this.dbd = {};
 			this.loadData();
@@ -60,11 +65,11 @@ sap.ui.define([
 			$.ajax({
 				type: 'GET',
 				url: this.custurl,
-				headers: this.headers,
+				headers: this.headers_cust,
 				cache: false,
 				success: function(odata) {
 
-					if (!window.custsha) {
+				/*	if (!window.custsha) {
 						window.custsha = odata.sha;
 					} else {
 
@@ -83,8 +88,8 @@ sap.ui.define([
 						}
 						that.rCount1 = 0;
 
-					}
-					cData = atob(odata.content);
+					}*/
+					cData = odata.content?atob(odata.content):odata;
 					cData = cData.trim() ? JSON.parse(cData) : [];
 					i.resolve();
 				},
@@ -141,6 +146,7 @@ sap.ui.define([
 							}
 						}
 					}
+
 					if (e.topUp) {
 						e.topUp.forEach(function(el) {
 							e.lnAmt = Number(e.lnAmt) + Number(el.amount);
@@ -185,6 +191,7 @@ sap.ui.define([
 			key.ren ? fil(obj.accDB, "Renewed", (key.ren)) : null;
 			fil(obj.lnAmtDB, "Outstanding", (key.lamt - key.clam - key.ram - key.adAmt));
 			fil(obj.lnAmtDB, "Settled", (key.clam + key.adAmt));
+
 			var tObj = {};
 			(key.expa || []).forEach(function(e) {
 				tObj[e.typ] ? tObj[e.typ] += Number(e.amt) : tObj[e.typ] = Number(e.amt);
@@ -644,8 +651,30 @@ sap.ui.define([
 					cd.forEach(function(el) {
 						if ((oy[io]["m"][oy[io]["m"].length - 1].ed >= new Date(el.lnDt) && oy[io]["m"][0].id <= new Date(el.clsDt ? new Date(Number(
 								el.clsDt)).toDateString() : "12 31 9999"))) {
-							lac[el.key] = Number(el.lnAmt);
+							lac[el.key] = {
+								lnAmt: Number(el.lnAmt),
+								tpAmt: 0,
+								adAmt: 0
+							}
+
+							try {
+								el.payDet.forEach(function(ele) {
+									if (new Date(ele.payDate) >= oy[io]["m"][0].id && new Date(ele.payDate) <= oy[io]["m"][oy[io]["m"].length - 1].ed) {
+										lac[el.key].adAmt += Number(ele.apAmt || 0);
+									}
+								});
+								if (el.topUp) {
+									el.topUp.forEach(function(ele) {
+										if (new Date(ele.date) >= oy[io]["m"][0].id && new Date(ele.date) <= oy[io]["m"][oy[io]["m"].length - 1].ed) {
+											lac[el.key].tpAmt += Number(ele.amount || 0);
+										}
+									});
+								}
+
+							} catch (err) {}
+
 						}
+
 						if (new Date(el.lnDt) >= e.id && new Date(el.lnDt) <= e.ed) {
 							ky = "nwa", [oy[io][ky], e[ky]] = fv([oy[io][ky], e[ky]], 1, {
 								key: el.key,
@@ -715,7 +744,7 @@ sap.ui.define([
 				oy[io]["m"].reverse();
 
 				Object.keys(lac).forEach(function(e) {
-					oy[io]["acc"]++, oy[io]["lamt"] += lac[e];
+					oy[io]["acc"]++, oy[io]["lamt"] += lac[e].lnAmt,oy[io]["adAmt_y"] += lac[e].adAmt,oy[io]["tpAmt_y"] += lac[e].tpAmt;
 				});
 
 			}
@@ -743,7 +772,7 @@ sap.ui.define([
 			}
 
 			function af(x) {
-				return [x.exp, x.acc, x.lamt, x.amtp, x.nwa, x.ga, x.cls, x.ren, x.clam, x.ram, x.amtd, x.adAmt, x.adAmtf, x.tpamt] = Array(15).fill(
+				return [x.exp, x.acc, x.lamt, x.amtp, x.nwa, x.ga, x.cls, x.ren, x.clam, x.ram, x.amtd, x.adAmt, x.adAmtf, x.tpamt,x.adAmt_y,x.tpAmt_y] = Array(17).fill(
 					0);
 			}
 
@@ -890,7 +919,7 @@ sap.ui.define([
 							amt: e.lnAmt,
 							dt: new Date(e.payDate),
 							rem: "Loan Closure - " + e.name + " (" + e.refNo + ")",
-							mKey:e.pKey
+							mKey: e.pKey
 						});
 						mArr.push({ //Credit Interest
 							key: "I",
@@ -898,7 +927,7 @@ sap.ui.define([
 							amt: (Number(e.amt) + Number(e.adAmtf)) - e.lnAmt,
 							dt: new Date(e.payDate),
 							rem: "Credited - " + e.name + " (" + e.refNo + ")",
-							mKey:e.pKey
+							mKey: e.pKey
 						});
 					} else {
 						if (e.amt < 0) {
@@ -908,7 +937,7 @@ sap.ui.define([
 								amt: e.amt,
 								dt: new Date(e.payDate),
 								rem: "Payment Reversal - " + e.name + " (" + e.refNo + ")",
-								mKey:e.pKey
+								mKey: e.pKey
 							});
 						} else if (e.amt > 0) {
 							mArr.push({ //Credit Interest
@@ -917,7 +946,7 @@ sap.ui.define([
 								amt: e.amt,
 								dt: new Date(e.payDate),
 								rem: "Credited - " + e.name + " (" + e.refNo + ")",
-								mKey:e.pKey
+								mKey: e.pKey
 							});
 						}
 						if (e.apAmt < 0) {
@@ -927,7 +956,7 @@ sap.ui.define([
 								amt: e.apAmt,
 								dt: new Date(e.payDate),
 								rem: "Payment Reversal - " + e.name + " (" + e.refNo + ")",
-								mKey:e.pKey
+								mKey: e.pKey
 							});
 						} else if (e.apAmt > 0) {
 							mArr.push({ //Credit Adv Pay
@@ -936,7 +965,7 @@ sap.ui.define([
 								amt: e.apAmt,
 								dt: new Date(e.payDate),
 								rem: "Advance Payment - " + e.name + " (" + e.refNo + ")",
-								mKey:e.pKey
+								mKey: e.pKey
 							});
 						}
 					}
@@ -948,7 +977,7 @@ sap.ui.define([
 						amt: -Number(e.lnAmt),
 						dt: new Date(e.date),
 						rem: "New Account - " + e.name + " (" + e.refNo + ")",
-						mKey:e.key
+						mKey: e.key
 					});
 				});
 
@@ -959,7 +988,7 @@ sap.ui.define([
 						amt: -Number(e.amount),
 						dt: new Date(e.date),
 						rem: "Topup - " + e.name + " (" + e.refNo + ")",
-						mKey:e.pKey
+						mKey: e.pKey
 					});
 				});
 
