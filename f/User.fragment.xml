@@ -9,6 +9,8 @@
 				<Button type="Ghost" width="10rem" icon="sap-icon://expense-report" text="Expense" class="sapUiTinyMargin" press=".onNavTo('exp')"/>
 				<Button type="Ghost" width="10rem" icon="sap-icon://business-objects-experience" text="Dashboard" press=".onNavTo('db')"
 					class="sapUiTinyMargin"/>
+				<Button id="idArchiveSrchBtn" type="Ghost" width="10rem" icon="sap-icon://browse-folder" press="onLoadArchive" text="Archive Search" 
+					class="sapUiTinyMargin"/>
 			</VBox>
 			<VBox jsutifyContent="Start" class=" sapUiTinyMarginBeginEnd">
 				<Button type="Ghost" width="10rem" icon="sap-icon://wallet" text="Asset" class="sapUiTinyMargin" press=".onNavTo('asset')"/>
@@ -17,6 +19,9 @@
 					class="sapUiTinyMargin"/>
 				<Button type="Ghost" width="10rem" icon="sap-icon://save" press="onBkpFile" text="Backup" visible="{=${uModel>/adm} || ${config>/bkp}}"
 					class="sapUiTinyMargin"/>
+				<Button type="Ghost" width="10rem" icon="sap-icon://folder" press="onArchive" text="Archive" visible="{=${uModel>/adm} || ${config>/bkp}}"
+					class="sapUiTinyMargin"/>
+			
 				<Button type="Ghost" width="10rem" icon="sap-icon://customer-history" press="onShowLog" text="Activity" visible="{=${uModel>/adm} }"
 					class="sapUiTinyMargin"/>
 				<Button type="Ghost" width="10rem" icon="sap-icon://log" press="onLogOut" text="Log out" class="sapUiTinyMargin"/>
