@@ -28,10 +28,12 @@ sap.ui.define([
 			if (window.testRun) {
 				this.custurl = "https://api.github.com/repos/britmanjerin/tst/contents/cust.json";
 				this.expurl = "https://api.github.com/repos/britmanjerin/tst/contents/exp.json";
+				this.archiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/archive.json";
 				this.byId("idStopTR").setVisible(true);
 			} else {
 				this.custurl = "https://api.github.com/repos/britmanjerin/tst/contents/cust_p.json";
 				this.expurl = "https://api.github.com/repos/britmanjerin/tst/contents/exp_p.json";
+				this.archiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/archive_p.json";
 				this.byId("idStopTR").setVisible(false);
 			}
 			if (!this.headers) {
@@ -59,36 +61,17 @@ sap.ui.define([
 			var that = this;
 			var i = $.Deferred();
 			var j = $.Deferred();
+			var k = $.Deferred();
 			sap.ui.core.BusyIndicator.show(0);
 			var cData = [],
-				eData = [];
+				eData = [],
+				aData=[];
 			$.ajax({
 				type: 'GET',
 				url: this.custurl,
 				headers: this.headers_cust,
 				cache: false,
 				success: function(odata) {
-
-				/*	if (!window.custsha) {
-						window.custsha = odata.sha;
-					} else {
-
-						if (window.custsha != odata.sha) {
-
-							if (that.rCount1 > 2) {
-								window.location.reload();
-							} else {
-								that.rCount1++;
-								$.sap.delayedCall(3000, this, function() {
-									that.loadCustData();
-								});
-							}
-
-							return;
-						}
-						that.rCount1 = 0;
-
-					}*/
 					cData = odata.content?atob(odata.content):odata;
 					cData = cData.trim() ? JSON.parse(cData) : [];
 					i.resolve();
@@ -98,33 +81,13 @@ sap.ui.define([
 					i.resolve();
 				}
 			});
+			
 			$.ajax({
 				type: 'GET',
 				url: this.expurl,
 				headers: this.headers,
 				cache: false,
 				success: function(odata) {
-
-					if (!window.expsha) {
-						window.expsha = odata.sha;
-					} else {
-						if (window.expsha != odata.sha) {
-
-							if (that.rCount2 > 2) {
-								window.location.reload();
-							} else {
-								that.rCount2++
-									$.sap.delayedCall(3000, this, function() {
-										that.loadCustData();
-									});
-							}
-
-							return;
-						}
-
-						that.rCount2 = 0;
-					}
-
 					eData = atob(odata.content);
 					eData = eData.trim() ? JSON.parse(eData) : [];
 					j.resolve();
@@ -134,8 +97,26 @@ sap.ui.define([
 					j.resolve();
 				}
 			});
+			
+				$.ajax({
+				type: 'GET',
+				url: this.archiveurl,
+				headers: this.headers_cust,
+				cache: false,
+				success: function(odata) {
+					aData = odata.content?atob(odata.content):odata;
+					aData = aData.trim() ? JSON.parse(aData) : [];
+					k.resolve();
+				},
+				error: function(oError) {
+					MessageBox.error(oError.responseJSON.message);
+					k.resolve();
+				}
+			});
 
-			$.when(i, j).done(function() {
+			$.when(i, j,k).done(function() {
+				cData = cData.concat(aData);
+				cData = [...new Map(cData.map(e => [e.key, e])).values()];
 				sap.ui.core.BusyIndicator.hide();
 				cData.forEach(function(e) {
 					if (e.clsDt) {
