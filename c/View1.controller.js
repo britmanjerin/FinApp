@@ -44,12 +44,14 @@ sap.ui.define([
 				this.mainurl = "https://api.github.com/repos/britmanjerin/tst/contents/main.json";
 				this.imgurl = "https://api.github.com/repos/britmanjerin/tst/contents/Images/";
 				this.asseturl = "https://api.github.com/repos/britmanjerin/tst/contents/asset.json";
+				this.archiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/archive.json";
 				this.byId("idStopTR").setVisible(true);
 			} else {
 				this.custurl = "https://api.github.com/repos/britmanjerin/tst/contents/cust_p.json";
 				this.mainurl = "https://api.github.com/repos/britmanjerin/tst/contents/main_p.json";
 				this.imgurl = "https://api.github.com/repos/britmanjerin/tst/contents/Images_p/";
 				this.asseturl = "https://api.github.com/repos/britmanjerin/tst/contents/asset_p.json";
+				this.archiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/archive_p.json";
 				this.byId("idStopTR").setVisible(false);
 			}
 
@@ -114,6 +116,9 @@ sap.ui.define([
 			this.getView().addDependent(this._oPopover);
 
 			sap.ui.getCore().byId("idUserLogged").setText(this.validateCookie("user"));
+			
+			sap.ui.getCore().byId("idArchiveSrchBtn").setText(window.archive ? "Close Archive" : "Archive Search");
+			sap.ui.getCore().byId("idArchiveSrchBtn").setIcon(window.archive ? "sap-icon://fallback" : "sap-icon://browse-folder");
 
 			this._oPopover.openBy(oEvent.getSource());
 		},
@@ -307,6 +312,7 @@ sap.ui.define([
 		},
 
 		loadCustData: function(head_cust) {
+		
 			FabFinV3.filterArr = [];
 			var that = this;
 			var i = $.Deferred();
@@ -314,15 +320,15 @@ sap.ui.define([
 			sap.ui.core.BusyIndicator.show(0);
 			$.ajax({
 				type: 'GET',
-				url: this.custurl,
-				headers: head_cust?head_cust:this.headers,
+				url: window.archive ? this.archiveurl : this.custurl,
+				headers: head_cust ? head_cust : this.headers,
 				cache: false,
 				success: function(odata) {
-					if (!window.custsha) {
-						window.custsha = odata.sha;
+					if (!window[window.archive?"archivesha":"custsha"]) {
+						window[window.archive?"archivesha":"custsha"] = odata.sha;
 					} else {
 						if (odata.sha) {
-							if (window.custsha != odata.sha) {
+							if (window[window.archive?"archivesha":"custsha"] != odata.sha) {
 								if (that.rCount1 > 2) {
 									window.location.reload();
 								} else {
@@ -338,11 +344,11 @@ sap.ui.define([
 					}
 
 					if (odata.content === "") {
-							that.loadCustData(that.headers_cust);
-							return;
+						that.loadCustData(that.headers_cust);
+						return;
 					}
 
-					var data = odata.content?atob(odata.content):odata;
+					var data = odata.content ? atob(odata.content) : odata;
 					data = data.trim() ? JSON.parse(data) : [];
 					data.forEach(function(e) {
 						var lnObj = that.formatter.setStatus_h(e, that);
@@ -365,6 +371,10 @@ sap.ui.define([
 					FabFinV3.filterArr.sort((a, b) => {
 						return a.no - b.no;
 					});
+					
+					that.filtOpt["Loan Closed"] = window.archive ? true : that.filtOpt["Loan Closed"];
+					that.filtOpt["Loan Renewed"] = window.archive ? true : that.filtOpt["Loan Renewed"];
+					
 					that.onFOP();
 
 					i.resolve();
@@ -1259,6 +1269,99 @@ sap.ui.define([
 				this._oPopover.close();
 			}
 		},
+		
+		onLoadArchive:function()
+			{
+				window.archive = !window.archive;
+				this.loadCustData();
+				this._oPopover.close();
+			},
+
+		onArchive: function(evt,head_cust) {
+			sap.ui.core.BusyIndicator.show(0);
+			var oModel = $.extend(true, [], this.mData);
+			oModel = oModel.filter(e => (e.lnCls === "X" || e.lnRen === "X"));
+			oModel.forEach(e => {
+				e.actClsDt = this.formatter.setClsdDt(e.payDet);
+			});
+			
+			var aData = oModel.filter(e=> Math.floor(Math.abs(new Date(e.actClsDt) - new Date(new Date().toDateString())) / (1000 * 60 * 60 * 24))>= 180);
+			
+			const excldKey = new Set(aData.map(item => item.key)); 
+			
+			const custData = this.mData.filter(item => !excldKey.has(item.key));
+
+			var that = this;
+			$.ajax({
+				type: 'GET',
+				url: this.archiveurl,
+				headers: head_cust ? head_cust : this.headers,
+				cache: false,
+				success: function(odata) {
+
+					if (!window.archivesha) {
+						window.archivesha = odata.sha;
+					} else {
+						if (odata.sha) {
+							if (window.archivesha != odata.sha) {
+								window.location.reload();
+							}
+						}
+					}
+
+					if (odata.content === "") {
+						that.onArchive(null,that.headers_cust);
+						return;
+					}
+
+					var data = odata.content ? atob(odata.content) : odata;
+					data = data.trim() ? JSON.parse(data) : [];
+					data = data.concat(aData);
+					data = [...new Map(data.map(e => [e.key, e])).values()];
+					
+					that.updateFile(data,window.archivesha,that.archiveurl,"archivesha",custData);
+
+				},
+				error: function(oError) {
+					sap.ui.core.BusyIndicator.hide();
+				}
+			});
+		},
+		
+		updateFile: function(oData, sha, url,key,cData) {
+		
+			var that = this;
+			var data = JSON.stringify(oData);
+
+			var body = {
+				message: "Updating file",
+				content: btoa(data),
+				sha: sha
+			};
+			sap.ui.core.BusyIndicator.show(0);
+			$.ajax({
+				type: 'PUT',
+				url: url,
+				headers: that.headers,
+				data: JSON.stringify(body),
+				dataType: 'text',
+				success: function(odata) {
+					window[key] = JSON.parse(odata).content.sha;
+					
+					if(key === "archivesha"){
+						that.updateFile(cData,window.custsha,that.custurl,"custsha");
+					}else{
+						sap.ui.core.BusyIndicator.hide();
+						that.loadCustData();
+						MessageBox.success("Archived Successfully.")
+					}
+				},
+				error: function(odata) {
+					sap.ui.core.BusyIndicator.hide();
+					MessageBox.error("Failed.")
+				}
+			});
+		},
 
 		onTestRun: function(evt) {
 			window.testRun = evt === "S" ? false : true;
@@ -1266,11 +1369,13 @@ sap.ui.define([
 			window.custsha = null;
 			window.expsha = null;
 			window.assetsha = null;
+			window.archivesha = null;
 			this.byId("idStopTR").setVisible(evt === "S" ? false : true);
 			this.custurl = "https://api.github.com/repos/britmanjerin/tst/contents/" + (evt === "S" ? "cust_p" : "cust") + ".json";
 			this.mainurl = "https://api.github.com/repos/britmanjerin/tst/contents/" + (evt === "S" ? "main_p" : "main") + ".json";
 			this.imgurl = "https://api.github.com/repos/britmanjerin/tst/contents/" + (evt === "S" ? "Images_p" : "Images") + "/";
 			this.asseturl = "https://api.github.com/repos/britmanjerin/tst/contents/" + (evt === "S" ? "asset_p" : "asset") + ".json";
+			this.asrchiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/" + (evt === "S" ? "archive_p" : "archive") + ".json";
 			this.loadCustData();
 			if (this._oPopover) {
 				this._oPopover.close();
