@@ -44,11 +44,13 @@ sap.ui.define([
 				this.custurl = "https://api.github.com/repos/britmanjerin/tst/contents/cust.json";
 				this.imgurl = "https://api.github.com/repos/britmanjerin/tst/contents/Images/";
 				this.asseturl = "https://api.github.com/repos/britmanjerin/tst/contents/asset.json";
+				this.archiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/archive.json";
 				this.byId("idStopTR").setVisible(true);
 			} else {
 				this.custurl = "https://api.github.com/repos/britmanjerin/tst/contents/cust_p.json";
 				this.imgurl = "https://api.github.com/repos/britmanjerin/tst/contents/Images_p/";
 				this.asseturl = "https://api.github.com/repos/britmanjerin/tst/contents/asset_p.json";
+				this.archiveurl = "https://api.github.com/repos/britmanjerin/tst/contents/archive_p.json";
 				this.byId("idStopTR").setVisible(false);
 			}
 
@@ -401,14 +403,14 @@ sap.ui.define([
 			$.ajax({
 				type: 'GET',
 				headers: head_cust?head_cust:this.headers,
-				url: this.custurl,
+				url: window.archive ? this.archiveurl : this.custurl,
 				cache: false,
 				success: function(odata) {
-					if (!window.custsha) {
-						window.custsha = odata.sha;
+					if (!window[window.archive?"archivesha":"custsha"]) {
+						window[window.archive?"archivesha":"custsha"] = odata.sha;
 					} else {
 						if(odata.sha){
-								if (window.custsha != odata.sha) {
+								if (window[window.archive?"archivesha":"custsha"] != odata.sha) {
 
 							if (that.rCount > 2) {
 								window.location.reload();
